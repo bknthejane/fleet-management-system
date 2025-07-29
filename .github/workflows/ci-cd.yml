@@ -1,24 +1,14 @@
-name: Full CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
-    paths:
-      - "Backend/**"
-      - "Frontend/**"
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
-    paths:
-      - "Backend/**"
-      - "Frontend/**"
-
-defaults:
-  run:
-    working-directory: Backend
+    branches: [ "main" ]
 
 jobs:
-  backend-build:
-    name: Backend Build
+  build:
+    name: Build Stage
     runs-on: ubuntu-latest
 
     steps:
@@ -36,18 +26,18 @@ jobs:
         run: dotnet build --no-restore --configuration Release Backend/FleetManagementSystem.sln
 
       - name: Publish
-        run: dotnet publish Backend/FleetManagementSystem.sln --configuration Release --output ./publish
+        run: dotnet publish Backend/FleetManagementSystem.sln --no-build --configuration Release --output ./publish
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: backend-app
+          name: app
           path: ./publish
 
-  backend-test:
-    name: Backend Test
+  test:
+    name: Test Stage
     runs-on: ubuntu-latest
-    needs: backend-build
+    needs: build
 
     steps:
       - uses: actions/checkout@v4
@@ -59,38 +49,15 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore Backend/FleetManagementSystem.sln
-
+  
       - name: Run tests
         run: |
-          cd Backend
-          dotnet test --verbosity normal
-
-  frontend-build:
-    name: Frontend Build & Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: |
-          cd ../Frontend
-          npm install
-
-      - name: Run frontend tests
-        run: |
-          cd ../Frontend
-          npm test
-
-  db-update:
+          (cd Backend && dotnet test --verbosity normal)
+  
+  db_update:
     name: Database Update
     runs-on: ubuntu-latest
-    needs: [backend-build, backend-test]
+    needs: [build, test]
     if: github.ref == 'refs/heads/main'
 
     env:
@@ -112,7 +79,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Backend/FleetManagementSystem.sln
 
-      - name: Install EF Core
+      - name: Install EF Core 
         run: dotnet tool install --global dotnet-ef
 
       - name: Update Database
@@ -121,31 +88,33 @@ jobs:
           dotnet ef database update
 
   deploy:
-    name: Backend Deploy
+    name: Deploy Stage
     runs-on: ubuntu-latest
-    needs: [backend-build, backend-test, db-update]
+    needs: [build, test, db_update]
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+  
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: backend-app
+          name: app
           path: ./app
-
+  
       - name: Build Docker image
         run: |
           cd Backend
-          docker build -f Dockerfile -t fleetmanagementsystem:latest .
-
+          docker build -f Dockerfile -t olp:latest .
+  
       - name: Verify Docker image
-        run: docker images fleetmanagementsystem:latest
-
+        run: |
+          docker images olp:latest
+  
       - name: Deploy application
         run: |
           echo "Starting deployment..."
