@@ -52,7 +52,7 @@ jobs:
   
       - name: Run tests
         run: |
-          (cd aspnet-core && dotnet test --verbosity normal)
+          (cd Backend && dotnet test --verbosity normal)
   
   db_update:
     name: Database Update
@@ -84,7 +84,7 @@ jobs:
 
       - name: Update Database
         run: |
-          cd aspnet-core/src/OnlineLearningPlatform.EntityFrameworkCore
+          cd Backend/src/FleetManagementSystem.EntityFrameworkCore
           dotnet ef database update
 
   deploy:
@@ -108,7 +108,7 @@ jobs:
   
       - name: Build Docker image
         run: |
-          cd aspnet-core
+          cd Backend
           docker build -f Dockerfile -t olp:latest .
   
       - name: Verify Docker image
