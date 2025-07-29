@@ -30,13 +30,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore aspnet-core/FleetManagementSystem.sln
+        run: dotnet restore Backend/FleetManagementSystem.sln
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release aspnet-core/FleetManagementSystem.sln
+        run: dotnet build --no-restore --configuration Release Backend/FleetManagementSystem.sln
 
       - name: Publish
-        run: dotnet publish aspnet-core/FleetManagementSystem.sln --configuration Release --output ./publish
+        run: dotnet publish Backend/FleetManagementSystem.sln --configuration Release --output ./publish
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -58,11 +58,11 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore aspnet-core/FleetManagementSystem.sln
+        run: dotnet restore Backend/FleetManagementSystem.sln
 
       - name: Run tests
         run: |
-          cd aspnet-core
+          cd Backend
           dotnet test --verbosity normal
 
   frontend-build:
@@ -110,14 +110,14 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore aspnet-core/FleetManagementSystem.sln
+        run: dotnet restore Backend/FleetManagementSystem.sln
 
       - name: Install EF Core
         run: dotnet tool install --global dotnet-ef
 
       - name: Update Database
         run: |
-          cd aspnet-core/src/FleetManagementSystem.EntityFrameworkCore
+          cd Backend/src/FleetManagementSystem.EntityFrameworkCore
           dotnet ef database update
 
   deploy:
@@ -140,7 +140,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd aspnet-core
+          cd Backend
           docker build -f Dockerfile -t fleetmanagementsystem:latest .
 
       - name: Verify Docker image
