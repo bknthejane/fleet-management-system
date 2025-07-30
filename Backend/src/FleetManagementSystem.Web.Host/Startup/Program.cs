@@ -1,4 +1,5 @@
-﻿using Abp.AspNetCore.Dependency;
+﻿using System;
+using Abp.AspNetCore.Dependency;
 using Abp.Dependency;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +17,10 @@ namespace FleetManagementSystem.Web.Host.Startup
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                    webBuilder
+                        .UseStartup<Startup>()
+                        .UseUrls($"http://*:{port}");
                 })
                 .UseCastleWindsor(IocManager.Instance.IocContainer);
     }
