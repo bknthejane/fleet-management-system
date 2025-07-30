@@ -108,12 +108,12 @@ jobs:
   
       - name: Build Docker image
         run: |
-          cd Backend/src/FleetManagementSystem.Web.Host
-          docker build -f Dockerfile -t olp:latest .
+          cd Backend
+          docker build -f Dockerfile -t fleetmanagementsystem:latest .
   
       - name: Verify Docker image
         run: |
-          docker images olp:latest
+          docker images fleetmanagementsystem:latest
   
       - name: Deploy application
         run: |
