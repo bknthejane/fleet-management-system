@@ -108,7 +108,7 @@ jobs:
   
       - name: Build Docker image
         run: |
-          cd Backend
+          cd Backend/src/FleetManagementSystem.Web.Host
           docker build -f Dockerfile -t olp:latest .
   
       - name: Verify Docker image
