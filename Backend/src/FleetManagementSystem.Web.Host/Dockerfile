@@ -4,7 +4,7 @@ WORKDIR /app
 COPY FleetManagementSystem.sln ./
 COPY src/ ./src/
 
-WORKDIR /app/src/FleetManagementSystem.Web.Host
+WORKDIR /src/FleetManagementSystem.Web.Host
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app/publish
 
