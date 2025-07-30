@@ -89,6 +89,8 @@ namespace FleetManagementSystem.Web.Host.Startup
 
             app.UseStaticFiles();
 
+            app.UseHttpsRedirection();
+
             app.UseRouting();
 
             app.UseAuthentication();
@@ -98,6 +100,7 @@ namespace FleetManagementSystem.Web.Host.Startup
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapHub<AbpCommonHub>("/signalr");
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("defaultWithArea", "{area}/{controller=Home}/{action=Index}/{id?}");
