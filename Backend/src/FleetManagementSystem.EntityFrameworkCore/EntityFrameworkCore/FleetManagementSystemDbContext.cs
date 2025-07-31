@@ -3,6 +3,7 @@ using Abp.Zero.EntityFrameworkCore;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
 using FleetManagementSystem.Domain.Drivers;
+using FleetManagementSystem.Domain.Incidents;
 using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Supervisors;
@@ -20,8 +21,8 @@ namespace FleetManagementSystem.EntityFrameworkCore
         public DbSet<Supervisor> Supervisors { get; set; }
         public DbSet<Mechanic> Mechanics { get; set; }
         public DbSet<Driver> Drivers { get; set; }
-
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Incident> Incidents { get; set; }
         public FleetManagementSystemDbContext(DbContextOptions<FleetManagementSystemDbContext> options)
             : base(options)
         {
