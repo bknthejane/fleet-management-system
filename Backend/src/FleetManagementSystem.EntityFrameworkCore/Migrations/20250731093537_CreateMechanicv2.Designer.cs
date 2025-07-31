@@ -3,6 +3,7 @@ using System;
 using FleetManagementSystem.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731093537_CreateMechanicv2")]
+    partial class CreateMechanicv2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1591,9 +1594,6 @@ namespace FleetManagementSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ContactNumber")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -1609,9 +1609,6 @@ namespace FleetManagementSystem.Migrations
                     b.Property<string>("Department")
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -1624,14 +1621,8 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("SupervisorId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Surname")
-                        .HasColumnType("text");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
