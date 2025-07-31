@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using Abp.Authorization.Users;
 using Abp.Extensions;
+using FleetManagementSystem.Domain.Municipalities;
 
 namespace FleetManagementSystem.Authorization.Users
 {
     public class User : AbpUser<User>
     {
         public virtual Guid? MunicipalityId { get; set; }
+        public virtual Municipality Municipality { get; set; }
+
         public const string DefaultPassword = "123qwe";
 
         public static string CreateRandomPassword()

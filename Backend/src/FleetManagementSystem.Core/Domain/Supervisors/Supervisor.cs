@@ -8,13 +8,17 @@ namespace FleetManagementSystem.Domain.Supervisors
 {
     public class Supervisor : FullAuditedEntity<Guid>
     {
+        public virtual string Name { get; set; }
+        public virtual string Surname { get; set; }
+        public virtual string Email { get; set; }
+        public virtual string ContactNumber { get; set; }
         public virtual string Department { get; set; }
 
         public virtual Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
         public virtual Municipality Municipality { get; set; }
 
-        public virtual Guid? UserId { get; set; }
+        public virtual long? UserId { get; set; }
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
     }
