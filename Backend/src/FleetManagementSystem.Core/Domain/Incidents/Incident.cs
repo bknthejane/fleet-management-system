@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities.Auditing;
 using FleetManagementSystem.Domain.Drivers;
-using FleetManagementSystem.Domain.JobCards;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Vehicles;
 
@@ -10,20 +9,20 @@ namespace FleetManagementSystem.Domain.Incidents
 {
     public class Incident : FullAuditedEntity<Guid>
     {
-        public virtual string Description { get; set; }
-        public virtual string IncidentType { get; set; }
+        public string Description { get; set; }
+        public string IncidentType { get; set; }
+        public string Department { get; set; }
+        public DateTime DateReported { get; set; } = DateTime.UtcNow;
 
-        public virtual DateTime DateReported { get; set; } = DateTime.UtcNow;
-
-        public virtual Guid VehicleId { get; set; }
+        public Guid VehicleId { get; set; }
         [ForeignKey("VehicleId")]
         public virtual Vehicle Vehicle { get; set; }
 
-        public virtual Guid DriverId { get; set; }
+        public Guid DriverId { get; set; }
         [ForeignKey("DriverId")]
         public virtual Driver Driver { get; set; }
 
-        public virtual Guid MunicipalityId { get; set; }
+        public Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
         public virtual Municipality Municipality { get; set; }
     }
