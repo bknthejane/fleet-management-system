@@ -9,7 +9,11 @@ namespace FleetManagementSystem.Domain.Mechanics
 {
     public class Mechanic : FullAuditedEntity<Guid>
     {
-        public virtual string Specialization { get; set; }
+        public virtual string Name { get; set; }
+        public virtual string Surname { get; set; }
+        public virtual string Email { get; set; }
+        public virtual string ContactNumber { get; set; }
+        public virtual string Department { get; set; }
 
         public virtual Guid SupervisorId { get; set; }
         [ForeignKey("SupervisorId")]
@@ -19,7 +23,7 @@ namespace FleetManagementSystem.Domain.Mechanics
         [ForeignKey("MunicipalityId")]
         public virtual Municipality Municipality { get; set; }
 
-        public virtual Guid? UserId { get; set; }
+        public virtual long? UserId { get; set; }
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
     }

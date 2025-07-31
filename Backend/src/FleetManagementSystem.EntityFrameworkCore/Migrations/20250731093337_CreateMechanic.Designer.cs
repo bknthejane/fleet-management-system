@@ -3,6 +3,7 @@ using System;
 using FleetManagementSystem.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731093337_CreateMechanic")]
+    partial class CreateMechanic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1585,68 +1588,6 @@ namespace FleetManagementSystem.Migrations
                     b.ToTable("AbpUsers");
                 });
 
-            modelBuilder.Entity("FleetManagementSystem.Domain.Mechanics.Mechanic", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ContactNumber")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("CreatorUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeleterUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Department")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("LastModifierUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("MunicipalityId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("SupervisorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Surname")
-                        .HasColumnType("text");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MunicipalityId");
-
-                    b.HasIndex("SupervisorId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Mechanics");
-                });
-
             modelBuilder.Entity("FleetManagementSystem.Domain.Municipalities.Municipality", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2037,31 +1978,6 @@ namespace FleetManagementSystem.Migrations
                     b.Navigation("LastModifierUser");
 
                     b.Navigation("Municipality");
-                });
-
-            modelBuilder.Entity("FleetManagementSystem.Domain.Mechanics.Mechanic", b =>
-                {
-                    b.HasOne("FleetManagementSystem.Domain.Municipalities.Municipality", "Municipality")
-                        .WithMany()
-                        .HasForeignKey("MunicipalityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FleetManagementSystem.Domain.Supervisors.Supervisor", "Supervisor")
-                        .WithMany()
-                        .HasForeignKey("SupervisorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FleetManagementSystem.Authorization.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Municipality");
-
-                    b.Navigation("Supervisor");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FleetManagementSystem.Domain.Supervisors.Supervisor", b =>

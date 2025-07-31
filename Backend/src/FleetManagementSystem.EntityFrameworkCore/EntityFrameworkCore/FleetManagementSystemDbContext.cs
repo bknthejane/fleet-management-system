@@ -2,6 +2,7 @@
 using Abp.Zero.EntityFrameworkCore;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
+using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Supervisors;
 using FleetManagementSystem.MultiTenancy;
@@ -15,6 +16,7 @@ namespace FleetManagementSystem.EntityFrameworkCore
         /* Define a DbSet for each entity of the application */
         public DbSet<Municipality> Municipalities { get; set; }
         public DbSet<Supervisor> Supervisors { get; set; }
+        public DbSet<Mechanic> Mechanics { get; set; }
 
         public FleetManagementSystemDbContext(DbContextOptions<FleetManagementSystemDbContext> options)
             : base(options)
