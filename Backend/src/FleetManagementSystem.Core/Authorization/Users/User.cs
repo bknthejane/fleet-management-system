@@ -7,6 +7,7 @@ namespace FleetManagementSystem.Authorization.Users
 {
     public class User : AbpUser<User>
     {
+        public virtual Guid? MunicipalityId { get; set; }
         public const string DefaultPassword = "123qwe";
 
         public static string CreateRandomPassword()

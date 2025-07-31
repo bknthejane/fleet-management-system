@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\src\FleetManagementSystem.EntityFrameworkCore\FleetManagementSystem.EntityFrameworkCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="Shouldly" Version="4.2.1" />

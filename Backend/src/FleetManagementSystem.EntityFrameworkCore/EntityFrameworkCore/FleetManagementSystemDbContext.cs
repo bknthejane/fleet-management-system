@@ -6,12 +6,14 @@ using FleetManagementSystem.MultiTenancy;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Linq;
+using FleetManagementSystem.Domain.Municipalities;
 
 namespace FleetManagementSystem.EntityFrameworkCore
 {
     public class FleetManagementSystemDbContext : AbpZeroDbContext<Tenant, Role, User, FleetManagementSystemDbContext>
     {
         /* Define a DbSet for each entity of the application */
+        public DbSet<Municipality> Municipalities { get; set; }
 
         public FleetManagementSystemDbContext(DbContextOptions<FleetManagementSystemDbContext> options)
             : base(options)
