@@ -3,6 +3,7 @@ using System;
 using FleetManagementSystem.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731131853_CreateDriverv2")]
+    partial class CreateDriverv2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1591,6 +1594,9 @@ namespace FleetManagementSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AssignedVehicleId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -1625,6 +1631,8 @@ namespace FleetManagementSystem.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedVehicleId");
 
                     b.HasIndex("MunicipalityId");
 
@@ -1797,6 +1805,69 @@ namespace FleetManagementSystem.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Supervisors");
+                });
+
+            modelBuilder.Entity("FleetManagementSystem.Domain.Vehicles.Vehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedDriverId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CreatedByVehicleControllerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FleetNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("LicenseExpiry")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Make")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Model")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("MunicipalityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RegistrationNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedDriverId");
+
+                    b.HasIndex("MunicipalityId");
+
+                    b.ToTable("Vehicle");
                 });
 
             modelBuilder.Entity("FleetManagementSystem.MultiTenancy.Tenant", b =>
@@ -2089,6 +2160,10 @@ namespace FleetManagementSystem.Migrations
 
             modelBuilder.Entity("FleetManagementSystem.Domain.Drivers.Driver", b =>
                 {
+                    b.HasOne("FleetManagementSystem.Domain.Vehicles.Vehicle", "AssignedVehicle")
+                        .WithMany()
+                        .HasForeignKey("AssignedVehicleId");
+
                     b.HasOne("FleetManagementSystem.Domain.Municipalities.Municipality", "Municipality")
                         .WithMany()
                         .HasForeignKey("MunicipalityId")
@@ -2098,6 +2173,8 @@ namespace FleetManagementSystem.Migrations
                     b.HasOne("FleetManagementSystem.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("AssignedVehicle");
 
                     b.Navigation("Municipality");
 
@@ -2144,6 +2221,23 @@ namespace FleetManagementSystem.Migrations
                     b.Navigation("Municipality");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FleetManagementSystem.Domain.Vehicles.Vehicle", b =>
+                {
+                    b.HasOne("FleetManagementSystem.Domain.Drivers.Driver", "AssignedDriver")
+                        .WithMany()
+                        .HasForeignKey("AssignedDriverId");
+
+                    b.HasOne("FleetManagementSystem.Domain.Municipalities.Municipality", "Municipality")
+                        .WithMany()
+                        .HasForeignKey("MunicipalityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedDriver");
+
+                    b.Navigation("Municipality");
                 });
 
             modelBuilder.Entity("FleetManagementSystem.MultiTenancy.Tenant", b =>
