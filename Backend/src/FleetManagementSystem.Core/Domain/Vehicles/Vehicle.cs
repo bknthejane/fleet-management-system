@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities.Auditing;
 using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Domain.Municipalities;
-using FleetManagementSystem.Domain.VehicleControllers;
 
 namespace FleetManagementSystem.Domain.Vehicles
 {
@@ -22,7 +21,6 @@ namespace FleetManagementSystem.Domain.Vehicles
 
         public virtual Guid CreatedByVehicleControllerId { get; set; }
         [ForeignKey("CreatedByVehicleControllerId")]
-        public virtual VehicleController CreatedByVehicleController { get; set; }
 
         public virtual Guid? AssignedDriverId { get; set; }
         [ForeignKey("AssignedDriverId")]
