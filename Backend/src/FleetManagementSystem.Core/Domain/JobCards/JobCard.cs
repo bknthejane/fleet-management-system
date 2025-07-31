@@ -4,37 +4,38 @@ using Abp.Domain.Entities.Auditing;
 using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Domain.Incidents;
 using FleetManagementSystem.Domain.Supervisors;
+using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Vehicles;
 
 namespace FleetManagementSystem.Domain.JobCards
 {
     public class JobCard : FullAuditedEntity<Guid>
     {
-        public virtual string JobCardNumber { get; set; }
-        public virtual DateTime DateOpened { get; set; } = DateTime.UtcNow;
-        public virtual string Status { get; set; } = "Open";
-        public virtual string Notes { get; set; }
+        public string JobCardNumber { get; set; }
+        public DateTime DateOpened { get; set; } = DateTime.UtcNow;
+        public string Status { get; set; } = "Open";
+        public string Notes { get; set; }
+        public string Priority { get; set; } = "Medium";
+        public DateTime? DateCompleted { get; set; }
 
-        public virtual Guid IncidentId { get; set; }
+        public Guid IncidentId { get; set; }
         [ForeignKey("IncidentId")]
         public virtual Incident Incident { get; set; }
 
-        public virtual Guid VehicleId { get; set; }
+        public Guid VehicleId { get; set; }
         [ForeignKey("VehicleId")]
         public virtual Vehicle Vehicle { get; set; }
 
-        public virtual Guid DriverId { get; set; }
+        public Guid DriverId { get; set; }
         [ForeignKey("DriverId")]
         public virtual Driver Driver { get; set; }
 
-        public virtual Guid? SupervisorId { get; set; }
+        public Guid? SupervisorId { get; set; }
         [ForeignKey("SupervisorId")]
         public virtual Supervisor Supervisor { get; set; }
 
-        public virtual DateTime? DateCompleted { get; set; }
-        public virtual decimal? EstimatedCost { get; set; }
-        public virtual decimal? ActualCost { get; set; }
-
-        public virtual string Priority { get; set; } = "Medium";
+        public Guid? MechanicId { get; set; }
+        [ForeignKey("MechanicId")]
+        public virtual Mechanic Mechanic { get; set; }
     }
 }
