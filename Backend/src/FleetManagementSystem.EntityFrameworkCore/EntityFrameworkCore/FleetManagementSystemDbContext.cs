@@ -6,6 +6,7 @@ using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Supervisors;
+using FleetManagementSystem.Domain.Vehicles;
 using FleetManagementSystem.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -20,6 +21,7 @@ namespace FleetManagementSystem.EntityFrameworkCore
         public DbSet<Mechanic> Mechanics { get; set; }
         public DbSet<Driver> Drivers { get; set; }
 
+        public DbSet<Vehicle> Vehicles { get; set; }
         public FleetManagementSystemDbContext(DbContextOptions<FleetManagementSystemDbContext> options)
             : base(options)
         {
