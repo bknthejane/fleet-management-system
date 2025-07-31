@@ -3,6 +3,7 @@ using System;
 using FleetManagementSystem.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731074100_CreateSupervisorv4")]
+    partial class CreateSupervisorv4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1576,8 +1579,6 @@ namespace FleetManagementSystem.Migrations
 
                     b.HasIndex("LastModifierUserId");
 
-                    b.HasIndex("MunicipalityId");
-
                     b.HasIndex("TenantId", "NormalizedEmailAddress");
 
                     b.HasIndex("TenantId", "NormalizedUserName");
@@ -1964,17 +1965,11 @@ namespace FleetManagementSystem.Migrations
                         .WithMany()
                         .HasForeignKey("LastModifierUserId");
 
-                    b.HasOne("FleetManagementSystem.Domain.Municipalities.Municipality", "Municipality")
-                        .WithMany()
-                        .HasForeignKey("MunicipalityId");
-
                     b.Navigation("CreatorUser");
 
                     b.Navigation("DeleterUser");
 
                     b.Navigation("LastModifierUser");
-
-                    b.Navigation("Municipality");
                 });
 
             modelBuilder.Entity("FleetManagementSystem.Domain.Supervisors.Supervisor", b =>

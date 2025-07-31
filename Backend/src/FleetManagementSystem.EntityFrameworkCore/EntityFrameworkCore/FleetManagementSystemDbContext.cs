@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
 using Abp.Zero.EntityFrameworkCore;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
-using FleetManagementSystem.MultiTenancy;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
-using System.Linq;
 using FleetManagementSystem.Domain.Municipalities;
+using FleetManagementSystem.Domain.Supervisors;
+using FleetManagementSystem.MultiTenancy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FleetManagementSystem.EntityFrameworkCore
 {
@@ -14,6 +14,7 @@ namespace FleetManagementSystem.EntityFrameworkCore
     {
         /* Define a DbSet for each entity of the application */
         public DbSet<Municipality> Municipalities { get; set; }
+        public DbSet<Supervisor> Supervisors { get; set; }
 
         public FleetManagementSystemDbContext(DbContextOptions<FleetManagementSystemDbContext> options)
             : base(options)
