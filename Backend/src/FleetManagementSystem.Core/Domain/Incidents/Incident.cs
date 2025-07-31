@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities.Auditing;
 using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Domain.JobCards;
+using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Vehicles;
 
 namespace FleetManagementSystem.Domain.Incidents
@@ -18,12 +19,12 @@ namespace FleetManagementSystem.Domain.Incidents
         [ForeignKey("VehicleId")]
         public virtual Vehicle Vehicle { get; set; }
 
-        public virtual Guid ReportedByDriverId { get; set; }
-        [ForeignKey("ReportedByDriverId")]
-        public virtual Driver ReportedByDriver { get; set; }
+        public virtual Guid DriverId { get; set; }
+        [ForeignKey("DriverId")]
+        public virtual Driver Driver { get; set; }
 
-        public virtual Guid? JobCardId { get; set; }
-        [ForeignKey("JobCardId")]
-        public virtual JobCard JobCard { get; set; }
+        public virtual Guid MunicipalityId { get; set; }
+        [ForeignKey("MunicipalityId")]
+        public virtual Municipality Municipality { get; set; }
     }
 }
