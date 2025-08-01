@@ -2,12 +2,18 @@
 
 import React from 'react';
 import { Button, Typography, Avatar } from 'antd';
+import { useRouter } from 'next/navigation';
 import { useStyles } from './styles/landingStyles';
 
 const { Title, Paragraph } = Typography;
 
-export default function LandingPage() {
+const LandingPage = () => {
   const { styles } = useStyles();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push('/login');
+  };
 
   return (
     <div className={styles.background}>
@@ -24,10 +30,17 @@ export default function LandingPage() {
         <Paragraph className={styles.subtitle}>
           Optimize your fleet operations with real-time tracking and analytics
         </Paragraph>
-        <Button type="primary" size="large" className={styles.button}>
+        <Button 
+          type="primary" 
+          size="large" 
+          className={styles.button}
+          onClick={handleGetStarted}
+        >
           Get Started
         </Button>
       </div>
     </div>
   );
 }
+
+export default LandingPage;
