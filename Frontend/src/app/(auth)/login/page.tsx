@@ -13,7 +13,7 @@ import {
   LockOutlined,
   MailOutlined,
 } from "@ant-design/icons";
-// import { useUserLoginActions } from "@/providers/auth-provider";
+import { useUserActions } from "@/providers/auth-provider";
 
 type FieldType = {
   email?: string;
@@ -24,7 +24,7 @@ const Login = () => {
   const { styles } = useStyles();
   const { Title } = Typography;
   const router = useRouter();
-//   const { userLogin } = useUserLoginActions();
+  const { userLogin } = useUserActions();
   const [loading, setLoading] = useState(false);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
@@ -35,7 +35,7 @@ const Login = () => {
         password: values.password || "",
         rememberClient: true,
       };
-    //   await userLogin(payload);
+      await userLogin(payload);
       setLoading(false);
       const user = sessionStorage.getItem("role") || "";
 
