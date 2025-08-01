@@ -6,7 +6,6 @@ import Typography from "antd/es/typography";
 import { useRouter } from "next/navigation";
 import { Button, Flex, Form, FormProps, Input, Spin } from "antd/es";
 import message from "antd/es/message";
-import "@ant-design/v5-patch-for-react-19";
 import Image from "next/image";
 import {
   EyeInvisibleOutlined,
