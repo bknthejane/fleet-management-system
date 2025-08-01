@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Layout, Menu, Avatar, Button, Typography } from "antd";
 import {
   DashboardOutlined,
-  UserOutlined,
   TeamOutlined,
-  BellOutlined,
-  SearchOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   BankOutlined,
@@ -28,7 +26,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
-  const adminName = "Admin Officer"; // Example name; can come from auth context
+  const adminName = "Admin Officer";
   const firstLetter = adminName.charAt(0).toUpperCase();
 
   const menuItems = [
@@ -53,14 +51,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    // Example logout logic
     console.log("Logging out...");
     router.push("/login");
   };
 
   return (
     <Layout className={styles.layout}>
-      {/* Sidebar */}
       <Sider
         trigger={null}
         collapsible
@@ -69,28 +65,43 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         width={280}
         collapsedWidth={80}
       >
-        <div className={styles.sidebarHeader}>
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            className={styles.shareIcon}
-          >
-            {!collapsed && "System Admin"}
-          </Button>
-
-          <div className={styles.userProfile}>
-            <Avatar size={48} className={styles.avatar}>
-              {firstLetter}
-            </Avatar>
-            {!collapsed && (
-              <div className={styles.userInfo}>
-                <Text className={styles.userName}>{adminName}</Text>
-                <div className={styles.onlineStatus}>
-                  <div className={styles.statusDot} />
-                </div>
-              </div>
-            )}
+        <div
+          className={styles.sidebarHeader}
+          style={{ padding: "16px", textAlign: "center" }}
+        >
+          <div style={{ width: 80, height: 80, margin: "0 auto 16px auto" }}>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
           </div>
+
+          {!collapsed && (
+            <div className={styles.userProfile}>
+              <Avatar size={80} className={styles.avatar}>
+                {firstLetter}
+              </Avatar>
+              <div className={styles.userInfo} style={{ marginTop: 0 }}>
+                <Text className={styles.userName}>{adminName}</Text>
+                <Text
+                  type="secondary"
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    marginTop: 2,
+                  }}
+                >
+                  System Admin
+                </Text>
+              </div>
+            </div>
+          )}
         </div>
 
         <Menu
@@ -100,26 +111,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           items={menuItems}
           className={styles.menu}
         />
-
-        <div className={styles.addFilesSection}>
-          <Button
-            type="primary"
-            className={styles.addFilesButton}
-            block={!collapsed}
-            onClick={() => router.push("/admin/municipalities/create")}
-          >
-            <span>+</span>
-            {!collapsed && (
-              <div>
-                <div>Add Municipality</div>
-                <Text className={styles.addFilesSubtext}>Create New</Text>
-              </div>
-            )}
-          </Button>
-        </div>
       </Sider>
 
-      {/* Main Layout */}
       <Layout className={styles.mainLayout}>
         <Header className={styles.header}>
           <div className={styles.headerLeft}>
@@ -133,13 +126,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           <div className={styles.headerRight}>
-            <div className={styles.searchContainer}>
-              <SearchOutlined className={styles.searchIcon} />
-              <input
-                placeholder="Search municipalities..."
-                className={styles.searchInput}
-              />
-            </div>
+            
             <Button
               type="text"
               icon={<LogoutOutlined />}
