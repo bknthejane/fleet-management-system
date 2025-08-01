@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Card,
   Row,
@@ -16,7 +16,6 @@ import {
 } from "antd";
 import { BankOutlined, PlusOutlined, MoreOutlined } from "@ant-design/icons";
 import { useStyles } from "./style/dashboardStyles";
-import { SearchContext } from "../layout";
 
 const { Title, Text } = Typography;
 
@@ -28,11 +27,13 @@ interface Municipality {
   contactPerson?: string;
   email?: string;
   contactNumber?: string;
+  adminUserName?: string;
+  adminEmail?: string;
+  adminPassword?: string;
 }
 
 const Dashboard: React.FC = () => {
   const { styles } = useStyles();
-  const { searchQuery } = useContext(SearchContext);
 
   const [allMunicipalities, setAllMunicipalities] = useState<Municipality[]>([
     { id: "01", name: "Mangaung Metro", admin: "John Mokoena" },
@@ -46,47 +47,72 @@ const Dashboard: React.FC = () => {
     { id: "09", name: "Dihlabeng Local", admin: "Rethabile Mothibi" },
   ]);
 
-  const filteredMunicipalities = useMemo(
-    () =>
-      allMunicipalities.filter(
-        (m) =>
-          m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          m.admin.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [searchQuery, allMunicipalities]
-  );
-
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentMunicipalities = filteredMunicipalities.slice(startIndex, endIndex);
+  const currentMunicipalities = allMunicipalities.slice(startIndex, endIndex);
 
-  const recentMunicipalities = filteredMunicipalities.slice(-4);
+  const recentMunicipalities = allMunicipalities.slice(-4);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
   const [form] = Form.useForm();
 
   const openModal = () => {
     form.resetFields();
+    setStep(1);
     setIsModalOpen(true);
   };
 
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setStep(1);
+  };
+
+  const handleNextStep = async () => {
+    try {
+      await form.validateFields([
+        "name",
+        "address",
+        "contactPerson",
+        "email",
+        "contactNumber",
+      ]);
+      setStep(2);
+    } catch {
+
+    }
+  };
+
+  const handlePrevStep = () => {
+    setStep(1);
+  };
+
   const handleModalSubmit = () => {
-    form.validateFields().then((values) => {
-      const newMunicipality: Municipality = {
-        id: (allMunicipalities.length + 1).toString().padStart(2, "0"),
-        name: values.name,
-        admin: values.contactPerson,
-        address: values.address,
-        contactPerson: values.contactPerson,
-        email: values.email,
-        contactNumber: values.contactNumber,
-      };
-      setAllMunicipalities([newMunicipality, ...allMunicipalities]);
-      setIsModalOpen(false);
-      setCurrentPage(1);
-    });
+    form
+      .validateFields()
+      .then((values) => {
+        const newMunicipality: Municipality = {
+          id: (allMunicipalities.length + 1).toString().padStart(2, "0"),
+          name: values.name,
+          admin: values.adminUserName || values.contactPerson,
+          address: values.address,
+          contactPerson: values.contactPerson,
+          email: values.email,
+          contactNumber: values.contactNumber,
+          adminUserName: values.adminUserName,
+          adminEmail: values.adminEmail,
+          adminPassword: values.adminPassword,
+        };
+        setAllMunicipalities([newMunicipality, ...allMunicipalities]);
+        setIsModalOpen(false);
+        setCurrentPage(1);
+        setStep(1);
+      })
+      .catch((info) => {
+        console.log("Validate Failed:", info);
+      });
   };
 
   return (
@@ -124,16 +150,25 @@ const Dashboard: React.FC = () => {
             <Card className={styles.folderCard}>
               <div className={styles.folderHeader}>
                 <span className={styles.folderId}>{municipality.id}</span>
-                <Button type="text" icon={<MoreOutlined />} className={styles.moreButton} />
+                <Button
+                  type="text"
+                  icon={<MoreOutlined />}
+                  className={styles.moreButton}
+                />
               </div>
-              <div className={styles.folderIcon} style={{ backgroundColor: "#10b981" }}>
+              <div
+                className={styles.folderIcon}
+                style={{ backgroundColor: "#10b981" }}
+              >
                 <BankOutlined />
               </div>
               <div className={styles.folderInfo}>
                 <Title level={5} className={styles.folderTitle}>
                   {municipality.name}
                 </Title>
-                <Text className={styles.folderSubtitle}>Admin: {municipality.admin}</Text>
+                <Text className={styles.folderSubtitle}>
+                  Admin: {municipality.admin}
+                </Text>
               </div>
             </Card>
           </Col>
@@ -144,7 +179,7 @@ const Dashboard: React.FC = () => {
         <Pagination
           current={currentPage}
           pageSize={pageSize}
-          total={filteredMunicipalities.length}
+          total={allMunicipalities.length}
           onChange={(page) => setCurrentPage(page)}
         />
       </div>
@@ -154,16 +189,32 @@ const Dashboard: React.FC = () => {
           <Card className={styles.recentCard} style={{ padding: 20 }}>
             <div className={styles.cardHeader}>
               <Title level={4}>Recent Municipalities</Title>
+              <Button
+                type="text"
+                icon={<MoreOutlined />}
+                className={styles.moreButton}
+              />
             </div>
             <List
               dataSource={recentMunicipalities}
               itemLayout="horizontal"
               renderItem={(item) => (
-                <List.Item className={styles.fileItem} key={item.id} style={{ padding: "12px 0" }}>
-                  <div className={styles.fileInfo} style={{ display: "flex", alignItems: "center" }}>
+                <List.Item
+                  className={styles.fileItem}
+                  key={item.id}
+                  style={{ padding: "12px 0" }}
+                >
+                  <div
+                    className={styles.fileInfo}
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
                     <Avatar
                       size={48}
-                      style={{ backgroundColor: "#10b981", fontSize: 18, fontWeight: 600 }}
+                      style={{
+                        backgroundColor: "#10b981",
+                        fontSize: 18,
+                        fontWeight: 600,
+                      }}
                     >
                       {item.name.charAt(0)}
                     </Avatar>
@@ -185,51 +236,111 @@ const Dashboard: React.FC = () => {
       </Row>
 
       <Modal
-        title="Add Municipality"
+        title={step === 1 ? "Add Municipality" : "Add Admin Account"}
         open={isModalOpen}
-        onOk={handleModalSubmit}
-        onCancel={() => setIsModalOpen(false)}
-        okText="Add"
+        onCancel={handleModalCancel}
+        footer={
+          step === 1
+            ? [
+                <Button key="cancel" onClick={handleModalCancel}>
+                  Cancel
+                </Button>,
+                <Button key="next" type="primary" onClick={handleNextStep}>
+                  Next
+                </Button>,
+              ]
+            : [
+                <Button key="back" onClick={handlePrevStep}>
+                  Back
+                </Button>,
+                <Button key="submit" type="primary" onClick={handleModalSubmit}>
+                  Submit
+                </Button>,
+              ]
+        }
+        width={700}
       >
         <Form form={form} layout="vertical" preserve={false} autoComplete="off">
-          <Form.Item
-            name="name"
-            label="Municipality Name"
-            rules={[{ required: true, message: "Please enter municipality name" }]}
-          >
-            <Input placeholder="Enter municipality name" />
-          </Form.Item>
-          <Form.Item
-            name="address"
-            label="Address"
-            rules={[{ required: true, message: "Please enter address" }]}
-          >
-            <Input placeholder="Enter address" />
-          </Form.Item>
-          <Form.Item
-            name="contactPerson"
-            label="Contact Person"
-            rules={[{ required: true, message: "Please enter contact person" }]}
-          >
-            <Input placeholder="Enter contact person" />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please enter email" },
-              { type: "email", message: "Please enter a valid email" },
-            ]}
-          >
-            <Input placeholder="Enter email" />
-          </Form.Item>
-          <Form.Item
-            name="contactNumber"
-            label="Contact Number"
-            rules={[{ required: true, message: "Please enter contact number" }]}
-          >
-            <Input placeholder="Enter contact number" />
-          </Form.Item>
+          {step === 1 && (
+            <>
+              <Form.Item
+                name="name"
+                label="Municipality Name"
+                rules={[{ required: true, message: "Please enter municipality name" }]}
+              >
+                <Input placeholder="Enter municipality name" />
+              </Form.Item>
+
+              <Form.Item
+                name="address"
+                label="Address"
+                rules={[{ required: true, message: "Please enter address" }]}
+              >
+                <Input placeholder="Enter address" />
+              </Form.Item>
+
+              <Form.Item
+                name="contactPerson"
+                label="Contact Person"
+                rules={[{ required: true, message: "Please enter contact person" }]}
+              >
+                <Input placeholder="Enter contact person" />
+              </Form.Item>
+
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: "Please enter email" },
+                  { type: "email", message: "Please enter a valid email" },
+                ]}
+              >
+                <Input placeholder="Enter email" />
+              </Form.Item>
+
+              <Form.Item
+                name="contactNumber"
+                label="Contact Number"
+                rules={[{ required: true, message: "Please enter contact number" }]}
+              >
+                <Input placeholder="Enter contact number" />
+              </Form.Item>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <Form.Item
+                name="adminUserName"
+                label="Admin Username"
+                rules={[{ required: true, message: "Please enter admin username" }]}
+              >
+                <Input placeholder="Enter admin username" />
+              </Form.Item>
+
+              <Form.Item
+                name="adminEmail"
+                label="Admin Email"
+                rules={[
+                  { required: true, message: "Please enter admin email" },
+                  { type: "email", message: "Please enter a valid email" },
+                ]}
+              >
+                <Input placeholder="Enter admin email" />
+              </Form.Item>
+
+              <Form.Item
+                name="adminPassword"
+                label="Admin Password"
+                rules={[
+                  { required: true, message: "Please enter admin password" },
+                  { min: 6, message: "Password must be minimum 6 characters" },
+                ]}
+              >
+                <Input.Password placeholder="Enter admin password" />
+              </Form.Item>
+            </>
+          )}
         </Form>
       </Modal>
     </div>

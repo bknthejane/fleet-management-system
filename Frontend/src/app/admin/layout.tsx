@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, createContext } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { Layout, Menu, Avatar, Button, Typography, Input } from "antd";
+import { Layout, Menu, Avatar, Button, Typography } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
-  SearchOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   BankOutlined,
@@ -18,8 +17,6 @@ import { useRouter } from "next/navigation";
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
-export const SearchContext = createContext<{ searchQuery: string }>({ searchQuery: "" });
-
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
@@ -27,7 +24,6 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { styles } = useStyles();
   const [collapsed, setCollapsed] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   const adminName = "Admin Officer";
@@ -60,98 +56,91 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   return (
-    <SearchContext.Provider value={{ searchQuery }}>
-      <Layout className={styles.layout}>
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          className={styles.sidebar}
-          width={280}
-          collapsedWidth={80}
+    <Layout className={styles.layout}>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        className={styles.sidebar}
+        width={280}
+        collapsedWidth={80}
+      >
+        <div
+          className={styles.sidebarHeader}
+          style={{ padding: "16px", textAlign: "center" }}
         >
-          <div className={styles.sidebarHeader} style={{ padding: "12px 16px", textAlign: "center" }}>
-            <div style={{ width: 120, height: 60, margin: "0 auto 16px auto" }}>
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={120}
-                height={60}
-                style={{
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-            {!collapsed && (
-              <div className={styles.userProfile}>
-                <Avatar size={80} className={styles.avatar}>
-                  {firstLetter}
-                </Avatar>
-                <div className={styles.userInfo} style={{ marginTop: 0 }}>
-                  <Text className={styles.userName}>{adminName}</Text>
-                  <Text
-                    type="secondary"
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      marginTop: 2,
-                    }}
-                  >
-                    System Admin
-                  </Text>
-                </div>
-              </div>
-            )}
+          <div style={{ width: 80, height: 80, margin: "0 auto 16px auto" }}>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
           </div>
 
-          <Menu
-            theme="dark"
-            mode="inline"
-            defaultSelectedKeys={["dashboard"]}
-            items={menuItems}
-            className={styles.menu}
-          />
-        </Sider>
-
-        <Layout className={styles.mainLayout}>
-          <Header className={styles.header}>
-            <div className={styles.headerLeft}>
-              <Button
-                type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
-                className={styles.collapseButton}
-              />
-              <Text className={styles.breadcrumbText}>Municipal Management</Text>
-            </div>
-
-            <div className={styles.headerRight}>
-              <div className={styles.searchContainer}>
-                <SearchOutlined className={styles.searchIcon} />
-                <Input
-                  placeholder="Search..."
-                  className={styles.searchInput}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  allowClear
-                />
+          {!collapsed && (
+            <div className={styles.userProfile}>
+              <Avatar size={80} className={styles.avatar}>
+                {firstLetter}
+              </Avatar>
+              <div className={styles.userInfo} style={{ marginTop: 0 }}>
+                <Text className={styles.userName}>{adminName}</Text>
+                <Text
+                  type="secondary"
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    marginTop: 2,
+                  }}
+                >
+                  System Admin
+                </Text>
               </div>
-              <Button
-                type="text"
-                icon={<LogoutOutlined />}
-                className={styles.headerButton}
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
             </div>
-          </Header>
+          )}
+        </div>
 
-          <Content className={styles.content}>{children}</Content>
-        </Layout>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={["dashboard"]}
+          items={menuItems}
+          className={styles.menu}
+        />
+      </Sider>
+
+      <Layout className={styles.mainLayout}>
+        <Header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className={styles.collapseButton}
+            />
+            <Text className={styles.breadcrumbText}>Municipal Management</Text>
+          </div>
+
+          <div className={styles.headerRight}>
+            
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              className={styles.headerButton}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </Header>
+
+        <Content className={styles.content}>{children}</Content>
       </Layout>
-    </SearchContext.Provider>
+    </Layout>
   );
 };
 
