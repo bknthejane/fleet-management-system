@@ -1,12 +1,17 @@
 import { createContext } from "react";
 
 export interface IMunicipality {
-    id: string;
-    name: string;
-    address: string;
-    contactPerson: string;
-    email: string;
-    contactNumber: string;
+    id?: string;
+    name?: string;
+    address?: string;
+    contactPerson?: string;
+    email?: string;
+    contactNumber?: string;
+    adminUserName?: string;
+    adminEmail?: string;
+    adminPassword?: string;
+    creatorUserId?: string;
+    LastModifierUserId?: string;
 }
 
 export interface IMunicipalityStateContext {

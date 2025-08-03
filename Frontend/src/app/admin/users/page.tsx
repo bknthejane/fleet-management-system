@@ -1,228 +1,278 @@
 "use client";
 
-import React, { useState } from "react";
-import { Table, Button, Card, Typography, Modal, Form, Input, Space, Tag } from "antd";
+import React, { useEffect, useState } from "react";
+import { Table, Button, Card, Typography, Modal, Form, Input, Space, Tag, message } from "antd";
 import { EditOutlined, DeleteOutlined, KeyOutlined } from "@ant-design/icons";
-import { useStyles } from "./style/usersStyles";
+import { useUserState, useUserActions } from "@/providers/user-provider";
+import { useMunicipalityState } from "@/providers/municipality-provider";
+import { IUser } from "@/providers/user-provider/context";
+import { IMunicipality } from "@/providers/municipality-provider/context";
 
 const { Title } = Typography;
 
-interface User {
-    id: string;
-    userName: string;
-    name: string;
-    surname: string;
-    emailAddress: string;
-    roleNames: string[];
-    municipalityName?: string;
-}
-
 const UsersPage: React.FC = () => {
-    const { styles } = useStyles();
+  const { users } = useUserState();
+  const { getUserList, updateUser, deleteUser } = useUserActions();
+  const { municipalities } = useMunicipalityState();
 
-    const [users, setUsers] = useState<User[]>([
-        {
-            id: "01",
-            userName: "sysadmin",
-            name: "John",
-            surname: "Mokoena",
-            emailAddress: "john@mangaung.gov.za",
-            roleNames: ["System Admin"],
-            municipalityName: "-",
-        },
-        {
-            id: "02",
-            userName: "kop_admin",
-            name: "Sarah",
-            surname: "Khumalo",
-            emailAddress: "sarah@kopanong.gov.za",
-            roleNames: ["Municipality Admin"],
-            municipalityName: "Kopanong Municipality",
-        },
-        {
-            id: "03",
-            userName: "naledi_admin",
-            name: "David",
-            surname: "Molefe",
-            emailAddress: "david@naledi.gov.za",
-            roleNames: ["Municipality Admin"],
-            municipalityName: "Naledi Municipality",
-        },
-    ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPasswordModal, setIsPasswordModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+  const [form] = Form.useForm();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalType, setModalType] = useState<"edit" | "password">("edit");
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [form] = Form.useForm();
+  useEffect(() => {
+    getUserList();
+  }, ['']);
 
-    const openModal = (type: "edit" | "password", user: User) => {
-        setModalType(type);
-        setCurrentUser(user);
+  const usersArray: IUser[] = Array.isArray(users)
+  ? users
+  : ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.items ??
+    ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
+    [];
 
-        if (type === "password") {
-            form.resetFields();
-        } else {
-            form.setFieldsValue({
-                userName: user.userName,
-                name: user.name,
-                surname: user.surname,
-                emailAddress: user.emailAddress,
-            });
+const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
+  ? municipalities
+  : ((municipalities as unknown) as { result?: IMunicipality[] })?.result ?? [];
+
+
+  const municipalityAdmins = usersArray
+    .filter((user) => user.roleNames?.includes("MUNICIPALITYADMIN"))
+    .map((user) => {
+      const municipality = municipalitiesArray.find(
+        (m) => m.id === user.MunicipalityId
+      );
+      return {
+        ...user,
+        municipalityName: municipality?.name || "-",
+      };
+    });
+
+  const openEditModal = (user: IUser) => {
+    setCurrentUser(user);
+    setIsPasswordModal(false);
+    form.setFieldsValue({
+      userName: user.userName,
+      name: user.name,
+      surname: user.surname,
+      emailAddress: user.emailAddress,
+    });
+    setIsModalOpen(true);
+  };
+
+  const openPasswordModal = (user: IUser) => {
+    setCurrentUser(user);
+    setIsPasswordModal(true);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!currentUser) return;
+
+    try {
+      const values = await form.validateFields();
+
+      if (isPasswordModal) {
+        message.success(`Password updated for ${currentUser.userName}`);
+      } else {
+        await updateUser({ ...currentUser, ...values });
+        message.success(`User ${values.userName} updated successfully`);
+      }
+
+      getUserList();
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error("Error:", err);
+      message.error("An error occurred. Please try again.");
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    Modal.confirm({
+      title: "Delete this user?",
+      content: "This action cannot be undone.",
+      okText: "Delete",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await deleteUser(id);
+          getUserList();
+          message.success("User deleted successfully");
+        } catch (err) {
+          console.error("Error deleting user:", err);
+          message.error("Failed to delete user");
         }
+      },
+    });
+  };
 
-        setIsModalOpen(true);
-    };
+  const columns = [
+    {
+      title: "Username",
+      dataIndex: "userName",
+      key: "userName",
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "First Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "Surname",
+      dataIndex: "surname",
+      key: "surname",
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "Email",
+      dataIndex: "emailAddress",
+      key: "emailAddress",
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "Roles",
+      dataIndex: "roleNames",
+      key: "roles",
+      render: (roles: string[]) =>
+        roles && roles.length > 0 ? (
+          roles.map((role, i) => <Tag key={i}>{role}</Tag>)
+        ) : (
+          <Tag>No roles</Tag>
+        ),
+    },
+    {
+      title: "Municipality",
+      dataIndex: "municipalityName",
+      key: "municipality",
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: unknown, user: IUser & { municipalityName?: string }) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => openEditModal(user)}
+            title="Edit User"
+          />
+          <Button
+            icon={<KeyOutlined />}
+            onClick={() => openPasswordModal(user)}
+            title="Change Password"
+          />
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(user.id!)}
+            title="Delete User"
+            disabled={!user.id}
+          />
+        </Space>
+      ),
+    },
+  ];
 
-    const handleModalSubmit = () => {
-        form.validateFields().then((values) => {
-            if (!currentUser) return;
+  return (
+    <div style={{ padding: 24 }}>
+      <Card>
+        <Title level={3}>Municipality Admins</Title>
 
-            if (modalType === "edit") {
-                setUsers(
-                    users.map((u) =>
-                        u.id === currentUser.id
-                            ? { ...u, ...values, roleNames: u.roleNames, municipalityName: u.municipalityName }
-                            : u
-                    )
-                );
-            } else if (modalType === "password") {
-                console.log(`Password changed for ${currentUser.userName}:`, values.password);
-            }
+        <Table
+          columns={columns}
+          dataSource={municipalityAdmins}
+          rowKey="id"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`,
+          }}
+          bordered
+          loading={!users && !municipalities}
+        />
+      </Card>
 
-            setIsModalOpen(false);
-        });
-    };
-
-    const handleDelete = (id: string) => {
-        Modal.confirm({
-            title: "Are you sure you want to delete this user?",
-            okText: "Delete",
-            okType: "danger",
-            onOk: () => setUsers(users.filter((user) => user.id !== id)),
-        });
-    };
-
-    const columns = [
-        { title: "Username", dataIndex: "userName", key: "userName" },
-        { title: "First Name", dataIndex: "name", key: "name" },
-        { title: "Surname", dataIndex: "surname", key: "surname" },
-        { title: "Email", dataIndex: "emailAddress", key: "emailAddress" },
-        {
-            title: "Roles",
-            dataIndex: "roleNames",
-            key: "roleNames",
-            render: (roles: string[]) => roles.map((role, index) => <Tag key={index}>{role}</Tag>),
-        },
-        {
-            title: "Municipality",
-            dataIndex: "municipalityName",
-            key: "municipalityName",
-            render: (name: string) => name || "-",
-        },
-        {
-            title: "Actions",
-            key: "actions",
-            render: (_: unknown, record: User) => (
-                <Space>
-                    <Button icon={<EditOutlined />} onClick={() => openModal("edit", record)} />
-                    <Button icon={<KeyOutlined />} onClick={() => openModal("password", record)} />
-                    <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
-                </Space>
-            ),
-        },
-    ];
-
-    return (
-        <div className={styles.container}>
-            <Card className={styles.card}>
-                <div className={styles.headerSection}>
-                    <Title level={3} className={styles.title}>
-                        Users
-                    </Title>
-                </div>
-
-                <Table
-                    columns={columns}
-                    dataSource={users.filter(user => !user.roleNames.includes("System Admin"))} // exclude system admins
-                    rowKey="id"
-                    pagination={{ pageSize: 5 }}
-                    className={styles.table}
-                    bordered
-                />
-
-            </Card>
-
-            <Modal
-                title={modalType === "edit" ? "Edit User" : "Change Password"}
-                open={isModalOpen}
-                onOk={handleModalSubmit}
-                onCancel={() => setIsModalOpen(false)}
-                okText={modalType === "password" ? "Update Password" : "Save"}
-            >
-                <Form form={form} layout="vertical" className={styles.modalForm}>
-                    {modalType === "password" ? (
-                        <>
-                            <Form.Item
-                                name="password"
-                                label="New Password"
-                                rules={[{ required: true, message: "Please enter a new password" }]}
-                            >
-                                <Input.Password placeholder="Enter new password" />
-                            </Form.Item>
-                            <Form.Item
-                                name="confirmPassword"
-                                label="Confirm Password"
-                                dependencies={["password"]}
-                                rules={[
-                                    { required: true, message: "Please confirm the password" },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            return !value || getFieldValue("password") === value
-                                                ? Promise.resolve()
-                                                : Promise.reject(new Error("Passwords do not match"));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password placeholder="Confirm new password" />
-                            </Form.Item>
-                        </>
-                    ) : (
-                        <>
-                            <Form.Item
-                                name="userName"
-                                label="Username"
-                                rules={[{ required: true, message: "Please enter a username" }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                name="name"
-                                label="First Name"
-                                rules={[{ required: true, message: "Please enter the first name" }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                name="surname"
-                                label="Surname"
-                                rules={[{ required: true, message: "Please enter the surname" }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                name="emailAddress"
-                                label="Email"
-                                rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                        </>
-                    )}
-                </Form>
-            </Modal>
-        </div>
-    );
+      <Modal
+        title={isPasswordModal ? "Change Password" : "Edit User"}
+        open={isModalOpen}
+        onOk={handleSubmit}
+        onCancel={() => setIsModalOpen(false)}
+        okText={isPasswordModal ? "Update Password" : "Save"}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical">
+          {isPasswordModal ? (
+            <>
+              <Form.Item
+                name="password"
+                label="New Password"
+                rules={[
+                  { required: true, message: "Enter new password" },
+                  { min: 6, message: "Password must be at least 6 characters" },
+                ]}
+              >
+                <Input.Password placeholder="Enter new password" />
+              </Form.Item>
+              <Form.Item
+                name="confirmPassword"
+                label="Confirm Password"
+                dependencies={["password"]}
+                rules={[
+                  { required: true, message: "Confirm password" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      return !value || getFieldValue("password") === value
+                        ? Promise.resolve()
+                        : Promise.reject(new Error("Passwords don't match"));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password placeholder="Confirm new password" />
+              </Form.Item>
+            </>
+          ) : (
+            <>
+              <Form.Item
+                name="userName"
+                label="Username"
+                rules={[{ required: true, message: "Username is required" }]}
+              >
+                <Input placeholder="Enter username" />
+              </Form.Item>
+              <Form.Item
+                name="name"
+                label="First Name"
+                rules={[{ required: true, message: "First name is required" }]}
+              >
+                <Input placeholder="Enter first name" />
+              </Form.Item>
+              <Form.Item
+                name="surname"
+                label="Surname"
+                rules={[{ required: true, message: "Surname is required" }]}
+              >
+                <Input placeholder="Enter surname" />
+              </Form.Item>
+              <Form.Item
+                name="emailAddress"
+                label="Email"
+                rules={[
+                  { required: true, message: "Email is required" },
+                  { type: "email", message: "Please enter a valid email" },
+                ]}
+              >
+                <Input placeholder="Enter email address" />
+              </Form.Item>
+            </>
+          )}
+        </Form>
+      </Modal>
+    </div>
+  );
 };
 
 export default UsersPage;

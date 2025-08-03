@@ -33,25 +33,19 @@ export const MunicipalityProvider = ({ children }: { children: React.ReactNode }
     const getMunicipalityList = async () => {
         dispatch(getMunicipalityListPending());
         const endpoint = `/services/app/Municipality/GetAll`;
-
         await instance
             .get(endpoint)
             .then((response) => {
-                const filteredData = response.data.data.map((municipality: IMunicipality) => ({
-                    id: municipality.id,
-                    name: municipality.name,
-                    address: municipality.address,
-                    contactPerson: municipality.contactPerson,
-                    email: municipality.email,
-                    contactNumber: municipality.contactNumber,
-                }));
-                dispatch(getMunicipalityListSuccess(filteredData));
+                dispatch(getMunicipalityListSuccess(response.data.result));
+                console.log(response.data.result);
             })
             .catch((error) => {
                 console.error(error);
                 dispatch(getMunicipalityListError());
             });
     };
+
+
 
     const getMunicipality = async (id: string) => {
         dispatch(getMunicipalityPending());
