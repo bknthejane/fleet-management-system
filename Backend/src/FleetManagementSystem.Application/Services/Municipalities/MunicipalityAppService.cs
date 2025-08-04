@@ -51,6 +51,7 @@ namespace FleetManagementSystem.Services.Municipalities
                 Surname = "Admin",
                 IsActive = true,
                 MunicipalityId = municipality.Id,
+                MunicipalityName = municipality.Name
             };
 
             if (string.IsNullOrWhiteSpace(user.UserName))

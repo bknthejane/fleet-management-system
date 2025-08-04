@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Card, Typography } from "antd";
 import {
   TeamOutlined,
@@ -9,14 +9,41 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useStyles } from "./style/municipalityDashboardStyle";
+import { useSupervisorActions, useSupervisorState } from "@/providers/supervisor-provider";
 
 const { Title, Text } = Typography;
 
 const DashboardPage: React.FC = () => {
   const { styles } = useStyles();
 
-  // Example data
-  const totalSupervisors = 8;
+  const { supervisors } = useSupervisorState();
+  const { getSupervisorList } = useSupervisorActions();
+
+  const [loggedInUser, setLoggedInUser] = useState<string>("");
+  const [municipalityId, setMunicipalityId] = useState<string>("");
+  const [municipalityName, setMunicipalityName] = useState<string>("");
+
+  useEffect(() => {
+    const storedUserName = sessionStorage.getItem("loggedInUser") || "";
+    const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
+    const storedMunicipalityName = sessionStorage.getItem("municipalityName") || "";
+
+    setLoggedInUser(storedUserName);
+    setMunicipalityId(storedMunicipalityId);
+    setMunicipalityName(storedMunicipalityName);
+
+    if (storedMunicipalityId) {
+      getSupervisorList();
+    }
+  }, ['']);
+
+  const municipalitySupervisors = supervisors?.filter(
+    (sup) => sup.municipalityId?.toString() === municipalityId
+  ) || [];
+
+  const totalSupervisors = municipalitySupervisors.length;
+
+  // Placeholder values for now
   const totalDrivers = 20;
   const totalVehicles = 35;
 
@@ -29,17 +56,18 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      {/* Welcome Banner */}
       <Card className={styles.welcomeCard}>
         <div>
           <Title level={3} style={{ marginBottom: 4 }}>
-            Welcome Back, Municipality Admin!
+            Welcome Back{loggedInUser ? `, ${loggedInUser}` : ""}!
           </Title>
-          <Text type="secondary">Today is {currentDate}</Text>
+          <Text type="secondary">
+            {municipalityName ? `${municipalityName} | ` : ""}
+            Today is {currentDate}
+          </Text>
         </div>
       </Card>
 
-      {/* Stats Tiles */}
       <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
         <Col xs={24} sm={12} md={8}>
           <Card hoverable className={styles.dashboardCard}>
@@ -81,7 +109,6 @@ const DashboardPage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Simple Info Banner */}
       <Card className={styles.infoCard} style={{ marginTop: 32 }}>
         <InfoCircleOutlined style={{ fontSize: 20, color: "#4a90e2", marginRight: 8 }} />
         <Text type="secondary">

@@ -17,5 +17,6 @@ namespace FleetManagementSystem.Services.Vehicles.Dto
         public string Make { get; set; }
         public DateTime LicenseExpiry { get; set; }
         public Guid MunicipalityId { get; set; }
+        public string MunicipalityName { get; set; }
     }
 }

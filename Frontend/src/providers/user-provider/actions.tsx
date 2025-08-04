@@ -16,118 +16,118 @@ export enum UserActionEnums {
 
     deleteUserPending = 'DELETE_USER_PENDING',
     deleteUserSuccess = 'DELETE_USER_SUCCESS',
-    deleteUserError = 'DELETE_USER_ERROR'
+    deleteUserError = 'DELETE_USER_ERROR',
 }
 
 export const getUserListPending = createAction<IUserStateContext>(
     UserActionEnums.getUserListPending, () => (
-    {
-        isPending: true,
-        isSuccess: false,
-        isError: false,
-    })
+        {
+            isPending: true,
+            isSuccess: false,
+            isError: false,
+        })
 );
 
 export const getUserListSuccess = createAction<IUserStateContext, IUser[]>(
     UserActionEnums.getUserListSuccess, (users: IUser[]) => (
-    {
-        isPending: false,
-        isSuccess: true,
-        isError: false,
-        users,
-    })
+        {
+            isPending: false,
+            isSuccess: true,
+            isError: false,
+            users,
+        })
 );
 
 export const getUserListError = createAction<IUserStateContext>(
     UserActionEnums.getUserListError, () => (
-    {
-        isPending: false,
-        isSuccess: false,
-        isError: true,
-    })
+        {
+            isPending: false,
+            isSuccess: false,
+            isError: true,
+        })
 );
 
 export const getUserPending = createAction<IUserStateContext>(
     UserActionEnums.getUserPending, () => (
-    {
-        isPending: true,
-        isSuccess: false,
-        isError: false,
-    })
+        {
+            isPending: true,
+            isSuccess: false,
+            isError: false,
+        })
 );
 
 export const getUserSuccess = createAction<IUserStateContext, IUser>(
     UserActionEnums.getUserSuccess, (User: IUser) => (
-    {
-        isPending: false,
-        isSuccess: true,
-        isError: false,
-        User,
-    })
+        {
+            isPending: false,
+            isSuccess: true,
+            isError: false,
+            User,
+        })
 );
 
 export const getUserError = createAction<IUserStateContext>(
     UserActionEnums.getUserError, () => (
-    {
-        isPending: false,
-        isSuccess: false,
-        isError: true,
-    })
+        {
+            isPending: false,
+            isSuccess: false,
+            isError: true,
+        })
 );
 
 export const updateUserPending = createAction<IUserStateContext>(
     UserActionEnums.updateUserPending, () => (
-    {
-        isPending: true,
-        isSuccess: false,
-        isError: false,
-    })
+        {
+            isPending: true,
+            isSuccess: false,
+            isError: false,
+        })
 );
 
 export const updateUserSuccess = createAction<IUserStateContext, IUser>(
     UserActionEnums.updateUserSuccess, (User: IUser) => (
-    {
-        isPending: false,
-        isSuccess: true,
-        isError: false,
-        User,
-    })
+        {
+            isPending: false,
+            isSuccess: true,
+            isError: false,
+            User,
+        })
 );
 
 export const updateUserError = createAction<IUserStateContext>(
     UserActionEnums.updateUserError, () => (
-    {
-        isPending: false,
-        isSuccess: false,
-        isError: true,
-    })
+        {
+            isPending: false,
+            isSuccess: false,
+            isError: true,
+        })
 );
 
 export const deleteUserPending = createAction<IUserStateContext>(
     UserActionEnums.deleteUserPending, () => (
-    {
-        isPending: true,
-        isSuccess: false,
-        isError: false,
-    })
+        {
+            isPending: true,
+            isSuccess: false,
+            isError: false,
+        })
 );
 
 export const deleteUserSuccess = createAction<IUserStateContext, IUser>(
     UserActionEnums.deleteUserSuccess, (User: IUser) => (
-    {
-        isPending: false,
-        isSuccess: true,
-        isError: false,
-        User,
-    })
+        {
+            isPending: false,
+            isSuccess: true,
+            isError: false,
+            User,
+        })
 );
 
 export const deleteUserError = createAction<IUserStateContext>(
     UserActionEnums.deleteUserError, () => (
-    {
-        isPending: false,
-        isSuccess: false,
-        isError: true,
-    })
+        {
+            isPending: false,
+            isSuccess: false,
+            isError: true,
+        })
 );
 

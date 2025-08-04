@@ -5,23 +5,23 @@ export interface IUser {
     password: string;
 }
 
-export interface IUserStateContext {
+export interface IAuthStateContext {
     isPending: boolean;
     isSuccess: boolean;
     isError: boolean;
     user?: IUser;
 }
 
-export interface IUserActionContext {
+export interface IAuthActionContext {
     userLogin: (payload: IUser) => void;
 }
 
-export const INITIAL_STATE: IUserStateContext = {
+export const INITIAL_STATE: IAuthStateContext = {
     isPending: false,
     isSuccess: false,
     isError: false,
 };
 
-export const UserStateContext = createContext<IUserStateContext>(INITIAL_STATE);
+export const AuthStateContext = createContext<IAuthStateContext>(INITIAL_STATE);
 
-export const UserActionContext = createContext<IUserActionContext>(undefined!);
+export const AuthActionContext = createContext<IAuthActionContext>(undefined!);

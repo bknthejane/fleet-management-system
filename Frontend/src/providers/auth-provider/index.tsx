@@ -1,12 +1,12 @@
 'use client';
 import { getAxiosInstance } from "@/utils/axiosInstance";
 import {
-    UserStateContext,
-    UserActionContext,
+    AuthStateContext,
+    AuthActionContext,
     INITIAL_STATE,
     IUser
 } from "./context";
-import { UserReducer } from "./reducer";
+import { AuthReducer } from "./reducer";
 import { useContext, useReducer } from "react";
 import {
     loginUserPending,
@@ -14,17 +14,19 @@ import {
     loginUserError
 } from "./actions";
 import { AbpTokenProperies, decodeToken } from "@/utils/jwt";
+import { useUserActions } from "../user-provider";
 
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [state, dispatch] = useReducer(UserReducer, INITIAL_STATE);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
     const instance = getAxiosInstance();
+    const { getUser } = useUserActions();
 
     const userLogin = async (payload: IUser) => {
         dispatch(loginUserPending());
         const endpoint = `/TokenAuth/Authenticate`;
         await instance
             .post(endpoint, payload)
-            .then((response) => {
+            .then(async(response) => {
                 const token = response.data.result.accessToken;
                 const decoded = decodeToken(token);
                 const userRole = decoded[AbpTokenProperies.role];
@@ -33,7 +35,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("role", userRole);
                 sessionStorage.setItem("userId", userId);
-
+                
+                await getUser(userId);
                 dispatch(loginUserSuccess(token));
             })
             .catch((error) => {
@@ -42,28 +45,28 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             });
     };
     return (
-        <UserStateContext.Provider value={state}>
-            <UserActionContext.Provider 
+        <AuthStateContext.Provider value={state}>
+            <AuthActionContext.Provider 
                 value={{
                     userLogin
                 }}
             >
                 {children}
-            </UserActionContext.Provider>
-        </UserStateContext.Provider>
+            </AuthActionContext.Provider>
+        </AuthStateContext.Provider>
     )
 }
 
-export const useUserState = () => {
-    const context = useContext(UserStateContext);
+export const useAuthState = () => {
+    const context = useContext(AuthStateContext);
     if (!context) {
         throw new Error("useUserState must be used within a UserProvider");
     }
     return context;
 };
 
-export const useUserActions = () => {
-    const context = useContext(UserActionContext);
+export const useAuthActions = () => {
+    const context = useContext(AuthActionContext);
     if (!context) {
         throw new Error("useUserActions must be used within a UserProvider");
     }

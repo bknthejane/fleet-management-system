@@ -13,6 +13,8 @@ namespace FleetManagementSystem.Domain.Drivers
         public virtual string Surname { get; set; }
         public virtual Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
+
+        public virtual string MunicipalityName { get; set; }
         public virtual Municipality Municipality { get; set; }
 
         public virtual Guid? AssignedVehicleId { get; set; }
