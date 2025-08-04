@@ -1,5 +1,4 @@
 import { createContext } from "react";
-import { IMunicipality } from "@/providers/municipality-provider/context";
 
 export interface IUser {
   id?: string;
@@ -9,7 +8,7 @@ export interface IUser {
   emailAddress?: string;
   roleNames?: string[];
   MunicipalityId?: string;
-  municipality?: IMunicipality;
+  municipalityName?: string;
 }
 
 export interface IUserStateContext {

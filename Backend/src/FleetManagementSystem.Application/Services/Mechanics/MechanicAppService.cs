@@ -50,7 +50,8 @@ namespace FleetManagementSystem.Services.Mechanics
                 Name = input.Name,
                 Surname = input.Surname,
                 IsActive = true,
-                MunicipalityId = input.MunicipalityId
+                MunicipalityId = input.MunicipalityId,
+                MunicipalityName = input.MunicipalityName,
             };
 
             var result = await _userManager.CreateAsync(user, input.Password);

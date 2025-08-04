@@ -25,7 +25,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FleetManagementSystem.Users
 {
-    [AbpAuthorize(PermissionNames.Pages_Users)]
+    [AbpAllowAnonymous]
     public class UserAppService : AsyncCrudAppService<User, UserDto, long, PagedUserResultRequestDto, CreateUserDto, UserDto>, IUserAppService
     {
         private readonly UserManager _userManager;

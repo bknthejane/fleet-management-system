@@ -4,16 +4,13 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Card, Typography, Modal, Form, Input, Space, Tag, message } from "antd";
 import { EditOutlined, DeleteOutlined, KeyOutlined } from "@ant-design/icons";
 import { useUserState, useUserActions } from "@/providers/user-provider";
-import { useMunicipalityState } from "@/providers/municipality-provider";
 import { IUser } from "@/providers/user-provider/context";
-import { IMunicipality } from "@/providers/municipality-provider/context";
 
 const { Title } = Typography;
 
 const UsersPage: React.FC = () => {
   const { users } = useUserState();
   const { getUserList, updateUser, deleteUser } = useUserActions();
-  const { municipalities } = useMunicipalityState();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPasswordModal, setIsPasswordModal] = useState(false);
@@ -25,27 +22,14 @@ const UsersPage: React.FC = () => {
   }, ['']);
 
   const usersArray: IUser[] = Array.isArray(users)
-  ? users
-  : ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.items ??
-    ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
-    [];
+    ? users
+    : ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.items ??
+      ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
+      [];
 
-const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
-  ? municipalities
-  : ((municipalities as unknown) as { result?: IMunicipality[] })?.result ?? [];
-
-
-  const municipalityAdmins = usersArray
-    .filter((user) => user.roleNames?.includes("MUNICIPALITYADMIN"))
-    .map((user) => {
-      const municipality = municipalitiesArray.find(
-        (m) => m.id === user.MunicipalityId
-      );
-      return {
-        ...user,
-        municipalityName: municipality?.name || "-",
-      };
-    });
+  const municipalityAdmins = usersArray.filter((user) =>
+    user.roleNames?.includes("MUNICIPALITYADMIN")
+  );
 
   const openEditModal = (user: IUser) => {
     setCurrentUser(user);
@@ -114,15 +98,9 @@ const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
       render: (text: string) => text || "-",
     },
     {
-      title: "First Name",
+      title: "Full Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Surname",
-      dataIndex: "surname",
-      key: "surname",
       render: (text: string) => text || "-",
     },
     {
@@ -145,13 +123,13 @@ const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
     {
       title: "Municipality",
       dataIndex: "municipalityName",
-      key: "municipality",
+      key: "municipalityId",
       render: (text: string) => text || "-",
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: unknown, user: IUser & { municipalityName?: string }) => (
+      render: (_: unknown, user: IUser) => (
         <Space>
           <Button
             icon={<EditOutlined />}
@@ -191,7 +169,7 @@ const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
               `${range[0]}-${range[1]} of ${total} items`,
           }}
           bordered
-          loading={!users && !municipalities}
+          loading={!users}
         />
       </Card>
 
@@ -201,7 +179,6 @@ const municipalitiesArray: IMunicipality[] = Array.isArray(municipalities)
         onOk={handleSubmit}
         onCancel={() => setIsModalOpen(false)}
         okText={isPasswordModal ? "Update Password" : "Save"}
-        destroyOnClose
       >
         <Form form={form} layout="vertical">
           {isPasswordModal ? (

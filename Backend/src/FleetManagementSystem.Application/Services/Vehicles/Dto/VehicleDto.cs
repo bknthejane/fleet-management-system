@@ -20,6 +20,7 @@ namespace FleetManagementSystem.Services.Vehicles.Dto
         public bool IsActive { get; set; }
 
         public Guid MunicipalityId { get; set; }
+        public string MunicipalityName { get; set; }
         public Guid? AssignedDriverId { get; set; }
     }
 }

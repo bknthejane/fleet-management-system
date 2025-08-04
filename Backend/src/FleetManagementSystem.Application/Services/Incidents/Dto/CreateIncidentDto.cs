@@ -16,6 +16,7 @@ namespace FleetManagementSystem.Services.Incidents.Dto
         public Guid VehicleId { get; set; }
         public Guid DriverId { get; set; }
         public Guid MunicipalityId { get; set; }
+        public string MunicipalityName { get; set; }
         public string Department { get; set; }
     }
 }

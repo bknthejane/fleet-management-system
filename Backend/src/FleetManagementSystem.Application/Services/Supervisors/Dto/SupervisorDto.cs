@@ -14,6 +14,7 @@ namespace FleetManagementSystem.Services.Supervisors.Dto
         public string ContactNumber { get; set; }
         public string Department { get; set; }
         public Guid MunicipalityId { get; set; }
+        public string MunicipalityName { get; set; }
         public long? UserId { get; set; }
     }
 }

@@ -1522,6 +1522,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid?>("MunicipalityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -1617,6 +1620,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -1681,6 +1687,9 @@ namespace FleetManagementSystem.Migrations
 
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid");
@@ -1810,6 +1819,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -1919,6 +1931,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -1984,6 +1999,9 @@ namespace FleetManagementSystem.Migrations
 
                     b.Property<Guid>("MunicipalityId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("MunicipalityName")
+                        .HasColumnType("text");
 
                     b.Property<string>("RegistrationNumber")
                         .HasColumnType("text");

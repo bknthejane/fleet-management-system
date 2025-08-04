@@ -21,6 +21,8 @@ namespace FleetManagementSystem.Domain.Mechanics
 
         public virtual Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
+
+        public virtual string MunicipalityName { get; set; }
         public virtual Municipality Municipality { get; set; }
 
         public virtual long? UserId { get; set; }

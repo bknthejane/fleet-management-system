@@ -13,7 +13,7 @@ import {
   LockOutlined,
   MailOutlined,
 } from "@ant-design/icons";
-import { useUserActions } from "@/providers/auth-provider";
+import { useAuthActions } from "@/providers/auth-provider";
 
 type FieldType = {
   email?: string;
@@ -24,7 +24,7 @@ const Login = () => {
   const { styles } = useStyles();
   const { Title } = Typography;
   const router = useRouter();
-  const { userLogin } = useUserActions();
+  const { userLogin } = useAuthActions();
   const [loading, setLoading] = useState(false);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
@@ -42,15 +42,18 @@ const Login = () => {
       if (user === "Admin") {
         message.success("Login successfully!");
         router.push("/admin/dashboard");
-      } else if (user === "Citizen") {
-        message.success("Login successfully!");
-        router.push("/citizen/dashboard");
-      } else if (user === "Municipality") {
+      } else if (user === "MunicipalityAdmin") {
         message.success("Login successfully!");
         router.push("/municipality/dashboard");
-      } else if (user === "ServiceProvider") {
+      } else if (user === "Supervisor") {
         message.success("Login successfully!");
-        router.push("/serviceProvider/dashboard");
+        router.push("/supervisor/dashboard");
+      } else if (user === "Driver") {
+        message.success("Login successfully!");
+        router.push("/driver/dashboard");
+      } else if (user === "Mechanic") {
+        message.success("Login successfully!");
+        router.push("/mechanic/dashboard");
       } else {
         message.error("Could not find user");
         router.push("/login");

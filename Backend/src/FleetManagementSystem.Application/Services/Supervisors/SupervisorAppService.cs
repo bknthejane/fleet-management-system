@@ -48,6 +48,7 @@ namespace FleetManagementSystem.Services.Supervisors
                 Surname = input.Surname,
                 IsActive = true,
                 MunicipalityId = input.MunicipalityId,
+                MunicipalityName = input.MunicipalityName,
 
             };
 

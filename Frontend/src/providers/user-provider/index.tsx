@@ -20,7 +20,7 @@ import {
     updateUserError,
     deleteUserPending,
     deleteUserSuccess,
-    deleteUserError
+    deleteUserError,
 } from "./actions";
 
 export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
@@ -33,8 +33,8 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
         await instance
             .get(endpoint)
             .then((response) => {
-                dispatch(getUserListSuccess(response.data.result));
-                console.log(response.data.result);
+                dispatch(getUserListSuccess(response.data.result.items));
+                console.log("Municipality name: ",response.data.result);
             })
             .catch((error) => {
                 console.error(error);
@@ -46,11 +46,23 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
 
     const getUser = async (id: string) => {
         dispatch(getUserPending());
-        const endpoint = `/services/app/User/Get/${id}`;
+        const endpoint = `/services/app/User/Get?Id=${id}`;
         await instance
             .get(endpoint)
-            .then((response)=> {
-                dispatch(getUserSuccess(response.data));
+            .then((response) => {
+                const result = response.data.result.municipalityName;
+                const municipalityName = result || "";
+                sessionStorage.setItem("municipalityName", municipalityName);
+
+                const result2 = response.data.result.municipalityId;
+                const municipalityId = result2 || "";
+                sessionStorage.setItem("municipalityId", municipalityId)
+
+                const result3 = response.data.result.name;
+                const loggedInUser = result3 || "";
+                sessionStorage.setItem("loggedInUser", loggedInUser);
+
+                dispatch(getUserSuccess(response.data.result));
             })
             .catch((error) => {
                 console.error(error);
@@ -88,12 +100,12 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <UserStateContext.Provider value={state}>
-            <UserActionContext.Provider 
+            <UserActionContext.Provider
                 value={{
                     getUserList,
                     getUser,
                     updateUser,
-                    deleteUser
+                    deleteUser,
                 }}
             >
                 {children}

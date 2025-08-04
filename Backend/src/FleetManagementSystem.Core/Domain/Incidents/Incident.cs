@@ -24,6 +24,8 @@ namespace FleetManagementSystem.Domain.Incidents
 
         public Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
+
+        public virtual string MunicipalityName { get; set; }
         public virtual Municipality Municipality { get; set; }
     }
 }
