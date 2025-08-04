@@ -5,6 +5,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { MunicipalityProvider } from "@/providers/municipality-provider";
 import { UsersProvider } from "@/providers/user-provider";
 import { SupervisorProvider } from "@/providers/supervisor-provider";
+import { VehicleProvider } from "@/providers/vehicle-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,15 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SupervisorProvider>
-          <MunicipalityProvider>
-            <UsersProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </UsersProvider>
-          </MunicipalityProvider>
-        </SupervisorProvider>
+        <VehicleProvider>
+          <SupervisorProvider>
+            <MunicipalityProvider>
+              <UsersProvider>
+                <AuthProvider>
+                  {children}
+                </AuthProvider>
+              </UsersProvider>
+            </MunicipalityProvider>
+          </SupervisorProvider>
+        </VehicleProvider>
       </body>
     </html>
   );
