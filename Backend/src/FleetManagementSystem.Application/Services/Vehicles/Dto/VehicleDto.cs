@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Abp.AutoMapper;
 using FleetManagementSystem.Domain.Vehicles;
 
@@ -21,6 +17,8 @@ namespace FleetManagementSystem.Services.Vehicles.Dto
 
         public Guid MunicipalityId { get; set; }
         public string MunicipalityName { get; set; }
+
         public Guid? AssignedDriverId { get; set; }
+        public string AssignedDriverName { get; set; }
     }
 }

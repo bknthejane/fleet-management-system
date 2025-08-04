@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.UI;
 using FleetManagementSystem.Domain.Drivers;
+using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Vehicles;
 using FleetManagementSystem.Services.Vehicles.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace FleetManagementSystem.Services.Vehicles
 {
@@ -16,23 +16,31 @@ namespace FleetManagementSystem.Services.Vehicles
     {
         private readonly IRepository<Vehicle, Guid> _vehicleRepository;
         private readonly IRepository<Driver, Guid> _driverRepository;
+        private readonly IRepository<Municipality, Guid> _municipalityRepository;
 
-        public VehicleAppService(IRepository<Vehicle, Guid> vehicleRepository, IRepository<Driver, Guid> driverRepository)
+        public VehicleAppService(
+            IRepository<Vehicle, Guid> vehicleRepository,
+            IRepository<Driver, Guid> driverRepository,
+            IRepository<Municipality, Guid> municipalityRepository)
         {
             _vehicleRepository = vehicleRepository;
             _driverRepository = driverRepository;
+            _municipalityRepository = municipalityRepository;
         }
 
         public async Task<List<VehicleDto>> GetAllAsync()
         {
-            var entities = await _vehicleRepository.GetAllListAsync();
-            return ObjectMapper.Map<List<VehicleDto>>(entities);
+            var vehicles = await _vehicleRepository.GetAllListAsync();
+            return ObjectMapper.Map<List<VehicleDto>>(vehicles);
         }
 
         public async Task<VehicleDto> GetAsync(Guid id)
         {
-            var entity = await _vehicleRepository.GetAsync(id);
-            return ObjectMapper.Map<VehicleDto>(entity);
+            var vehicle = await _vehicleRepository.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null)
+                throw new UserFriendlyException("Vehicle not found.");
+
+            return ObjectMapper.Map<VehicleDto>(vehicle);
         }
 
         public async Task<VehicleDto> CreateAsync(CreateVehicleDto input)
@@ -40,15 +48,64 @@ namespace FleetManagementSystem.Services.Vehicles
             var vehicle = ObjectMapper.Map<Vehicle>(input);
             vehicle.Id = Guid.NewGuid();
 
+            // Fill DB columns for MunicipalityName and AssignedDriverName
+            var municipality = await _municipalityRepository.FirstOrDefaultAsync(m => m.Id == vehicle.MunicipalityId);
+            vehicle.MunicipalityName = municipality?.Name;
+
+            if (vehicle.AssignedDriverId.HasValue)
+            {
+                var driver = await _driverRepository.FirstOrDefaultAsync(d => d.Id == vehicle.AssignedDriverId.Value);
+                vehicle.AssignedDriverName = driver?.Name;
+            }
+
             await _vehicleRepository.InsertAsync(vehicle);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
             return ObjectMapper.Map<VehicleDto>(vehicle);
         }
 
         public async Task<VehicleDto> UpdateAsync(UpdateVehicleDto input)
         {
             var vehicle = await _vehicleRepository.GetAsync(input.Id);
+            if (vehicle == null)
+                throw new UserFriendlyException("Vehicle not found.");
+
+            var oldAssignedDriverId = vehicle.AssignedDriverId;
+
             ObjectMapper.Map(input, vehicle);
+
+            // Update stored names in DB
+            var municipality = await _municipalityRepository.FirstOrDefaultAsync(m => m.Id == vehicle.MunicipalityId);
+            vehicle.MunicipalityName = municipality?.Name;
+
+            if (vehicle.AssignedDriverId.HasValue)
+            {
+                var driver = await _driverRepository.GetAsync(vehicle.AssignedDriverId.Value);
+
+                // Municipality check
+                if (driver.MunicipalityId != vehicle.MunicipalityId)
+                    throw new UserFriendlyException("Driver and Vehicle must belong to the same municipality.");
+
+                // Unassign old vehicle if driver had one
+                if (driver.AssignedVehicleId.HasValue && driver.AssignedVehicleId != vehicle.Id)
+                {
+                    var oldVehicle = await _vehicleRepository.GetAsync(driver.AssignedVehicleId.Value);
+                    oldVehicle.AssignedDriverId = null;
+                    oldVehicle.AssignedDriverName = null;
+                    await _vehicleRepository.UpdateAsync(oldVehicle);
+                }
+
+                driver.AssignedVehicleId = vehicle.Id;
+                vehicle.AssignedDriverName = driver.Name;
+                await _driverRepository.UpdateAsync(driver);
+            }
+            else
+            {
+                vehicle.AssignedDriverName = null;
+            }
+
             await _vehicleRepository.UpdateAsync(vehicle);
+            await CurrentUnitOfWork.SaveChangesAsync();
 
             return ObjectMapper.Map<VehicleDto>(vehicle);
         }
@@ -57,45 +114,5 @@ namespace FleetManagementSystem.Services.Vehicles
         {
             await _vehicleRepository.DeleteAsync(id);
         }
-
-        public async Task AssignVehicleToDriver(Guid vehicleId, Guid driverId)
-        {
-            var vehicle = await _vehicleRepository.GetAsync(vehicleId);
-            var driver = await _driverRepository.GetAsync(driverId);
-
-            if (vehicle == null)
-                throw new UserFriendlyException("Vehicle not found.");
-
-            if (driver == null)
-                throw new UserFriendlyException("Driver not found.");
-
-            // Ensure they belong to the same municipality
-            if (vehicle.MunicipalityId != driver.MunicipalityId)
-                throw new UserFriendlyException("Driver and Vehicle must belong to the same municipality.");
-
-            // Unassign previous driver if the vehicle is already assigned
-            if (vehicle.AssignedDriverId.HasValue)
-            {
-                var oldDriver = await _driverRepository.GetAsync(vehicle.AssignedDriverId.Value);
-                oldDriver.AssignedVehicleId = null;
-                await _driverRepository.UpdateAsync(oldDriver);
-            }
-
-            // If the driver already had a vehicle, unassign it
-            if (driver.AssignedVehicleId.HasValue)
-            {
-                var oldVehicle = await _vehicleRepository.GetAsync(driver.AssignedVehicleId.Value);
-                oldVehicle.AssignedDriverId = null;
-                await _vehicleRepository.UpdateAsync(oldVehicle);
-            }
-
-            // Assign vehicle to driver
-            vehicle.AssignedDriverId = driver.Id;
-            driver.AssignedVehicleId = vehicle.Id;
-
-            await _vehicleRepository.UpdateAsync(vehicle);
-            await _driverRepository.UpdateAsync(driver);
-        }
-
     }
 }

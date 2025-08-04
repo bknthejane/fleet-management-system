@@ -1961,6 +1961,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid?>("AssignedDriverId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AssignedDriverName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
