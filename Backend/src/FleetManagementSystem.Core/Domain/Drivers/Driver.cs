@@ -11,15 +11,17 @@ namespace FleetManagementSystem.Domain.Drivers
     {
         public virtual string Name { get; set; }
         public virtual string Surname { get; set; }
+
         public virtual Guid MunicipalityId { get; set; }
         [ForeignKey("MunicipalityId")]
-
         public virtual string MunicipalityName { get; set; }
         public virtual Municipality Municipality { get; set; }
 
         public virtual Guid? AssignedVehicleId { get; set; }
         [ForeignKey("AssignedVehicleId")]
         public virtual Vehicle AssignedVehicle { get; set; }
+
+        public virtual string AssignedVehicleFleetNumber { get; set; }
 
         public virtual long? UserId { get; set; }
         [ForeignKey("UserId")]

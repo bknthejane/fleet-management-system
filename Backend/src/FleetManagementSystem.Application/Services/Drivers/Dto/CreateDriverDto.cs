@@ -9,9 +9,12 @@ namespace FleetManagementSystem.Services.Drivers.Dto
     {
         public string Name { get; set; }
         public string Surname { get; set; }
+
         public Guid MunicipalityId { get; set; }
+
         public string MunicipalityName { get; set; }
-        public Guid? AssignedVehicleId { get; set; }
+
+        //public Guid? AssignedVehicleId { get; set; }
 
         public string Username { get; set; }
         public string Email { get; set; }

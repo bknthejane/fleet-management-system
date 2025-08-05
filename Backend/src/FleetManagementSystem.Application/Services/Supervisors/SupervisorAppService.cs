@@ -87,10 +87,38 @@ namespace FleetManagementSystem.Services.Supervisors
         public async Task<SupervisorDto> UpdateAsync(UpdateSupervisorDto input)
         {
             var supervisor = await _supervisorRepository.GetAsync(input.Id);
+            if (supervisor == null)
+            {
+                throw new UserFriendlyException("Supervisor not found.");
+            }
+
+            var user = await _userManager.FindByIdAsync(supervisor.UserId.ToString());
+            if (user == null)
+            {
+                throw new UserFriendlyException("Linked user not found.");
+            }
+
+            user.Name = input.Name;
+            user.Surname = input.Surname;
+            user.EmailAddress = input.Email;
+            user.MunicipalityId = input.MunicipalityId;
+            user.MunicipalityName = input.MunicipalityName;
+            user.IsActive = true;
+
+            var userUpdateResult = await _userManager.UpdateAsync(user);
+            if (!userUpdateResult.Succeeded)
+            {
+                throw new UserFriendlyException("Failed to update user: " + string.Join(", ", userUpdateResult.Errors));
+            }
+
             ObjectMapper.Map(input, supervisor);
+            supervisor.MunicipalityId = input.MunicipalityId;
+            supervisor.MunicipalityName = input.MunicipalityName;
             await _supervisorRepository.UpdateAsync(supervisor);
+
             return ObjectMapper.Map<SupervisorDto>(supervisor);
         }
+
 
         public async Task DeleteAsync(Guid id)
         {

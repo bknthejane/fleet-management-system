@@ -9,7 +9,10 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useStyles } from "./style/municipalityDashboardStyle";
+
 import { useSupervisorActions, useSupervisorState } from "@/providers/supervisor-provider";
+import { useDriverActions, useDriverState } from "@/providers/driver-provider";
+import { useVehicleActions, useVehicleState } from "@/providers/vehicle-provider";
 
 const { Title, Text } = Typography;
 
@@ -18,6 +21,12 @@ const DashboardPage: React.FC = () => {
 
   const { supervisors } = useSupervisorState();
   const { getSupervisorList } = useSupervisorActions();
+
+  const { drivers } = useDriverState();
+  const { getDriverList } = useDriverActions();
+
+  const { vehicles } = useVehicleState();
+  const { getVehicleList } = useVehicleActions();
 
   const [loggedInUser, setLoggedInUser] = useState<string>("");
   const [municipalityId, setMunicipalityId] = useState<string>("");
@@ -34,18 +43,26 @@ const DashboardPage: React.FC = () => {
 
     if (storedMunicipalityId) {
       getSupervisorList();
+      getDriverList();
+      getVehicleList();
     }
-  }, ['']);
+  }, []);
 
   const municipalitySupervisors = supervisors?.filter(
     (sup) => sup.municipalityId?.toString() === municipalityId
   ) || [];
 
-  const totalSupervisors = municipalitySupervisors.length;
+  const municipalityDrivers = drivers?.filter(
+    (driver) => driver.municipalityId?.toString() === municipalityId
+  ) || [];
 
-  // Placeholder values for now
-  const totalDrivers = 20;
-  const totalVehicles = 35;
+  const municipalityVehicles = vehicles?.filter(
+    (vehicle) => vehicle.municipalityId?.toString() === municipalityId
+  ) || [];
+
+  const totalSupervisors = municipalitySupervisors.length;
+  const totalDrivers = municipalityDrivers.length;
+  const totalVehicles = municipalityVehicles.length;
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",

@@ -11,6 +11,7 @@ interface SupervisorModalProps {
   onClose: () => void;
   editRecord: ISupervisor | null;
   onSave: (values: ISupervisor) => void;
+  saving?: boolean;
 }
 
 const SupervisorModal: React.FC<SupervisorModalProps> = ({
@@ -18,6 +19,7 @@ const SupervisorModal: React.FC<SupervisorModalProps> = ({
   onClose,
   editRecord,
   onSave,
+  saving = false,
 }) => {
   const { styles } = useStyles();
   const [form] = Form.useForm<ISupervisor>();
@@ -28,7 +30,7 @@ const SupervisorModal: React.FC<SupervisorModalProps> = ({
     } else {
       form.resetFields();
     }
-  }, [editRecord, open]);
+  }, [open]);
 
   const handleSubmit = async () => {
     try {
@@ -60,10 +62,10 @@ const SupervisorModal: React.FC<SupervisorModalProps> = ({
       open={open}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button key="cancel" onClick={onClose} disabled={saving}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button key="submit" type="primary" onClick={handleSubmit} loading={saving}>
           Submit
         </Button>,
       ]}
@@ -79,20 +81,20 @@ const SupervisorModal: React.FC<SupervisorModalProps> = ({
           <Col span={12}>
             <Title level={5}>Supervisor Info</Title>
             <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
+              <Input disabled={saving} />
             </Form.Item>
             <Form.Item name="surname" label="Surname" rules={[{ required: true }]}>
-              <Input />
+              <Input disabled={saving} />
             </Form.Item>
             <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
-              <Input />
+              <Input disabled={saving} />
             </Form.Item>
             <Form.Item name="contactNumber" label="Contact Number" rules={[{ required: true }]}>
-              <Input />
+              <Input disabled={saving} />
             </Form.Item>
 
             <Form.Item name="department" label="Department" rules={[{ required: true }]}>
-              <Select placeholder="Select Department">
+              <Select placeholder="Select Department" disabled={saving}>
                 <Option value="Maintenance">Maintenance</Option>
                 <Option value="Fabrication">Fabrication</Option>
                 <Option value="Diverse Workshop Support">Diverse Workshop Support</Option>
@@ -102,13 +104,22 @@ const SupervisorModal: React.FC<SupervisorModalProps> = ({
 
           <Col span={12}>
             <Title level={5}>Account Credentials</Title>
-            <Form.Item name="username" label="Username" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="password" label="Password" rules={[{ required: true }]}>
-              <Input.Password />
-            </Form.Item>
+            {editRecord ? (
+              <p style={{ color: "rgba(0,0,0,0.45)", fontStyle: "italic" }}>
+                Account info cannot be updated here.
+              </p>
+            ) : (
+              <>
+                <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+                <Form.Item name="password" label="Password" rules={[{ required: true }]}>
+                  <Input.Password />
+                </Form.Item>
+              </>
+            )}
           </Col>
+
         </Row>
       </Form>
     </Modal>

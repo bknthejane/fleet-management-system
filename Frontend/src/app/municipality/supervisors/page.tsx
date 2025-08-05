@@ -22,6 +22,9 @@ const SupervisorsPage: React.FC = () => {
 
   const [municipalityId, setMunicipalityId] = useState<string>("");
 
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
     setMunicipalityId(storedMunicipalityId);
@@ -29,7 +32,7 @@ const SupervisorsPage: React.FC = () => {
     if (storedMunicipalityId) {
       getSupervisorList();
     }
-  }, ['']);
+  }, []);
 
   const openModal = (record?: ISupervisor) => {
     setEditRecord(record || null);
@@ -42,6 +45,7 @@ const SupervisorsPage: React.FC = () => {
   };
 
   const handleSaveSupervisor = async (values: ISupervisor) => {
+    setSaving(true);
     try {
       const userId = sessionStorage.getItem("userId") || "";
       const municipalityId = sessionStorage.getItem("municipalityId") || "";
@@ -63,11 +67,13 @@ const SupervisorsPage: React.FC = () => {
         message.success(`Added Supervisor: ${supervisor.name}`);
       }
 
-      getSupervisorList();
+      await getSupervisorList();
       closeModal();
     } catch (error) {
       console.error("Error saving supervisor:", error);
       message.error("Failed to save supervisor");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -79,9 +85,17 @@ const SupervisorsPage: React.FC = () => {
       okText: "Delete",
       okType: "danger",
       onOk: async () => {
-        await deleteSupervisor(id);
-        message.success("Supervisor deleted successfully");
-        getSupervisorList();
+        setDeleting(true);
+        try {
+          await deleteSupervisor(id);
+          message.success("Supervisor deleted successfully");
+          await getSupervisorList();
+        } catch (error) {
+          console.error("Delete error:", error);
+          message.error("Failed to delete supervisor");
+        } finally {
+          setDeleting(false);
+        }
       },
     });
   };
@@ -111,8 +125,18 @@ const SupervisorsPage: React.FC = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button type="link" onClick={() => openModal(record)}>Edit</Button>
-          <Button danger type="link" onClick={() => handleDeleteSupervisor(record.id)}>Delete</Button>
+          <Button type="link" onClick={() => openModal(record)} disabled={saving || deleting}>
+            Edit
+          </Button>
+          <Button
+            danger
+            type="link"
+            onClick={() => handleDeleteSupervisor(record.id)}
+            loading={deleting}
+            disabled={saving}
+          >
+            Delete
+          </Button>
         </Space>
       ),
     },
@@ -125,7 +149,7 @@ const SupervisorsPage: React.FC = () => {
           Supervisors
         </Title>
 
-        <Button type="primary" onClick={() => openModal()}>
+        <Button type="primary" onClick={() => openModal()} disabled={saving || deleting}>
           Add Supervisor
         </Button>
       </div>
@@ -137,6 +161,7 @@ const SupervisorsPage: React.FC = () => {
           rowKey="id"
           pagination={{ pageSize: 5 }}
           bordered
+          loading={!supervisors}
         />
       </Card>
 
@@ -145,6 +170,7 @@ const SupervisorsPage: React.FC = () => {
         onClose={closeModal}
         editRecord={editRecord}
         onSave={handleSaveSupervisor}
+        saving={saving}
       />
     </div>
   );
