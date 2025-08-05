@@ -34,7 +34,7 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
             .get(endpoint)
             .then((response) => {
                 dispatch(getUserListSuccess(response.data.result.items));
-                console.log("Municipality name: ",response.data.result);
+                console.log("Municipality name: ", response.data.result);
             })
             .catch((error) => {
                 console.error(error);
@@ -44,31 +44,28 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
 
 
 
-    const getUser = async (id: string) => {
-        dispatch(getUserPending());
-        const endpoint = `/services/app/User/Get?Id=${id}`;
-        await instance
-            .get(endpoint)
-            .then((response) => {
-                const result = response.data.result.municipalityName;
-                const municipalityName = result || "";
-                sessionStorage.setItem("municipalityName", municipalityName);
+    const getUser = async (id: string): Promise<IUser> => {
+        try {
+            dispatch(getUserPending());
+            const endpoint = `/services/app/User/Get?Id=${id}`;
+            const response = await instance.get(endpoint);
 
-                const result2 = response.data.result.municipalityId;
-                const municipalityId = result2 || "";
-                sessionStorage.setItem("municipalityId", municipalityId)
+            const result = response.data.result;
 
-                const result3 = response.data.result.name;
-                const loggedInUser = result3 || "";
-                sessionStorage.setItem("loggedInUser", loggedInUser);
+            sessionStorage.setItem("municipalityName", result.municipalityName || "");
+            sessionStorage.setItem("municipalityId", result.municipalityId || "");
+            sessionStorage.setItem("loggedInUser", result.name || "");
 
-                dispatch(getUserSuccess(response.data.result));
-            })
-            .catch((error) => {
-                console.error(error);
-                dispatch(getUserError());
-            });
+            dispatch(getUserSuccess(result));
+
+            return result;
+        } catch (error) {
+            console.error(error);
+            dispatch(getUserError());
+            throw error;
+        }
     };
+
 
     const updateUser = async (User: IUser) => {
         dispatch(updateUserPending());

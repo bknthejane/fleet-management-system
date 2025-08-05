@@ -1593,6 +1593,9 @@ namespace FleetManagementSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AssignedVehicleFleetNumber")
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("AssignedVehicleId")
                         .HasColumnType("uuid");
 

@@ -7,8 +7,9 @@ export interface IUser {
   surname?: string;
   emailAddress?: string;
   roleNames?: string[];
-  MunicipalityId?: string;
+  municipalityId?: string;
   municipalityName?: string;
+  userId?: string;
 }
 
 export interface IUserStateContext {
@@ -21,7 +22,7 @@ export interface IUserStateContext {
 
 export interface IUserActionContext {
   getUserList: () => void;
-  getUser: (id: string) => void;
+  getUser: (id: string) => Promise<IUser>;
   updateUser: (user: IUser) => void;
   deleteUser: (id: string) => void;
 }
