@@ -13,6 +13,7 @@ namespace FleetManagementSystem.Services.Incidents.Dto
     {
         public string Description { get; set; }
         public string IncidentType { get; set; }
+        public string Status { get; set; } = "Submitted";
         public Guid VehicleId { get; set; }
         public Guid DriverId { get; set; }
         public Guid MunicipalityId { get; set; }

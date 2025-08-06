@@ -41,7 +41,7 @@ export const useStyles = createStyles(() => ({
   `,
   logo: css`
     // border: 2px solid white;
-    // background: white; /* Optional white background for visibility */
+    // background: white;
   `,
   textSection: css`
     max-width: 40rem;
@@ -67,17 +67,28 @@ export const useStyles = createStyles(() => ({
     margin-bottom: 2rem;
   `,
   button: css`
-    background-color: #00aeef;
-    border-color: #00aeef;
-    border-radius: 0.5rem;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    transition: transform 0.3s ease, background 0.3s ease;
+    width: 100%;
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.4);
+    transition: background 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
 
     &:hover {
-      background-color: #008fc1;
-      border-color: #008fc1;
+      background: linear-gradient(135deg, #475569 0%, #334155 100%);
       transform: scale(1.05);
+      box-shadow: 0 8px 28px rgba(71, 85, 105, 0.6);
+    }
+
+    &:focus {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      box-shadow: 0 0 10px 3px rgba(71, 92, 119, 0.5);
+      outline: none;
     }
   `,
 }));

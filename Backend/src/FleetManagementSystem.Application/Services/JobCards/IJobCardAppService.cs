@@ -13,9 +13,5 @@ namespace FleetManagementSystem.Services.JobCards
         Task<JobCardDto> CreateAsync(CreateJobCardDto input);
         Task<JobCardDto> UpdateAsync(JobCardDto input);
         Task DeleteAsync(Guid id);
-
-        Task AssignToMechanicAsync(Guid jobCardId, Guid mechanicId);
-        Task MarkAsDoneAsync(Guid jobCardId);
-        Task CloseJobCardAsync(Guid jobCardId);
     }
 }

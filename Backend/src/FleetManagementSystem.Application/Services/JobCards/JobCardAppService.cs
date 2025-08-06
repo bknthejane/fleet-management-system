@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using FleetManagementSystem.Domain.JobCards;
+using FleetManagementSystem.Domain.Incidents;
 using FleetManagementSystem.Services.JobCards.Dto;
 
 namespace FleetManagementSystem.Services.JobCards
@@ -11,10 +12,14 @@ namespace FleetManagementSystem.Services.JobCards
     public class JobCardAppService : ApplicationService, IJobCardAppService
     {
         private readonly IRepository<JobCard, Guid> _jobCardRepository;
+        private readonly IRepository<Incident, Guid> _incidentRepository;
 
-        public JobCardAppService(IRepository<JobCard, Guid> jobCardRepository)
+        public JobCardAppService(
+            IRepository<JobCard, Guid> jobCardRepository,
+            IRepository<Incident, Guid> incidentRepository)
         {
             _jobCardRepository = jobCardRepository;
+            _incidentRepository = incidentRepository;
         }
 
         public async Task<List<JobCardDto>> GetAllAsync()
@@ -44,33 +49,51 @@ namespace FleetManagementSystem.Services.JobCards
         public async Task<JobCardDto> UpdateAsync(JobCardDto input)
         {
             var jobCard = await _jobCardRepository.GetAsync(input.Id);
+            var oldStatus = jobCard.Status;
+
             ObjectMapper.Map(input, jobCard);
+
+            // Handle status changes
+            switch (input.Status)
+            {
+                case "Assigned":
+                    jobCard.Status = "Assigned";
+                    if (jobCard.IncidentId != Guid.Empty)
+                    {
+                        var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
+                        incident.Status = "Assigned";
+                        await _incidentRepository.UpdateAsync(incident);
+                    }
+                    break;
+
+                case "Done":
+                    jobCard.Status = "Done";
+                    jobCard.DateCompleted = DateTime.UtcNow;
+                    if (jobCard.IncidentId != Guid.Empty)
+                    {
+                        var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
+                        incident.Status = "Done";
+                        await _incidentRepository.UpdateAsync(incident);
+                    }
+                    break;
+
+                case "Closed":
+                    jobCard.Status = "Closed";
+                    jobCard.DateCompleted = DateTime.UtcNow;
+                    if (jobCard.IncidentId != Guid.Empty)
+                    {
+                        var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
+                        incident.Status = "Closed";
+                        await _incidentRepository.UpdateAsync(incident);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
             await _jobCardRepository.UpdateAsync(jobCard);
             return ObjectMapper.Map<JobCardDto>(jobCard);
-        }
-
-        public async Task AssignToMechanicAsync(Guid jobCardId, Guid mechanicId)
-        {
-            var jobCard = await _jobCardRepository.GetAsync(jobCardId);
-            jobCard.AssignedMechanicId = mechanicId;
-            jobCard.Status = "In Progress";
-            await _jobCardRepository.UpdateAsync(jobCard);
-        }
-
-        public async Task MarkAsDoneAsync(Guid jobCardId)
-        {
-            var jobCard = await _jobCardRepository.GetAsync(jobCardId);
-            jobCard.Status = "Done";
-            jobCard.DateCompleted = DateTime.UtcNow;
-            await _jobCardRepository.UpdateAsync(jobCard);
-        }
-
-        public async Task CloseJobCardAsync(Guid jobCardId)
-        {
-            var jobCard = await _jobCardRepository.GetAsync(jobCardId);
-            jobCard.Status = "Closed";
-            jobCard.DateCompleted = DateTime.UtcNow;
-            await _jobCardRepository.UpdateAsync(jobCard);
         }
 
         public async Task DeleteAsync(Guid id)
@@ -78,5 +101,4 @@ namespace FleetManagementSystem.Services.JobCards
             await _jobCardRepository.DeleteAsync(id);
         }
     }
-
 }

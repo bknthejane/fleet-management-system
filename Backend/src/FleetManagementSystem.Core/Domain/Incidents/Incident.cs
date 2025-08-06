@@ -12,6 +12,7 @@ namespace FleetManagementSystem.Domain.Incidents
         public string Description { get; set; }
         public string IncidentType { get; set; }
         public string Department { get; set; }
+        public string Status { get; set; }
         public DateTime DateReported { get; set; } = DateTime.UtcNow;
 
         public Guid VehicleId { get; set; }
