@@ -17,7 +17,6 @@ import { IDriver } from "@/providers/driver-provider/context";
 import { IVehicle } from "@/providers/vehicle-provider/context";
 import { useDriverState, useDriverActions } from "@/providers/driver-provider";
 import { useVehicleState, useVehicleActions } from "@/providers/vehicle-provider";
-import { useUserActions } from "@/providers/user-provider";
 import { ColumnsType } from "antd/es/table";
 import DriverModal from "@/components/DriverModal";
 
@@ -30,7 +29,6 @@ const DriversPage: React.FC = () => {
   const { vehicles } = useVehicleState();
   const { getDriverList, createDriver, updateDriver, deleteDriver } = useDriverActions();
   const { getVehicleList, updateVehicle } = useVehicleActions();
-  // const { updateUser, getUser } = useUserActions();
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);

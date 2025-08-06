@@ -2,8 +2,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities.Auditing;
 using FleetManagementSystem.Authorization.Users;
+using FleetManagementSystem.Domain.JobCards;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Supervisors;
+using FleetManagementSystem.Domain.Vehicles;
 
 namespace FleetManagementSystem.Domain.Mechanics
 {
@@ -24,6 +26,10 @@ namespace FleetManagementSystem.Domain.Mechanics
 
         public virtual string MunicipalityName { get; set; }
         public virtual Municipality Municipality { get; set; }
+
+        public virtual Guid? AssignedJobCardId { get; set; }
+        [ForeignKey("AssignedJobCardId")]
+        public virtual JobCard AssignedJobCard { get; set; }
 
         public virtual long? UserId { get; set; }
         [ForeignKey("UserId")]

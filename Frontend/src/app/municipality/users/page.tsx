@@ -42,9 +42,9 @@ const UsersPage: React.FC = () => {
       ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
       [];
 
-  const targetMunicipalityId = "bff594ba-9f2a-403d-901b-e2edef0057fb"; // Replace or get dynamically
+  const targetMunicipalityId = "bff594ba-9f2a-403d-901b-e2edef0057fb";
 
-  // 🔶 Filter out MUNICIPALITYADMINs and include only users in this municipality
+
   const municipalityUsers = usersArray.filter(
     (user) =>
       user.municipalityId === targetMunicipalityId &&
