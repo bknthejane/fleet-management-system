@@ -39,5 +39,13 @@ namespace FleetManagementSystem.Users.Dto
 
         public string MunicipalityId { get; set; }
         public string MunicipalityName { get; set; }
+
+        public string SupervisorId { get; set; }
+        public string SupervisorName { get; set; }
+
+        public Guid? DriverId { get; set; }
+        public string DriverName { get; set; }
+
+        public Guid? AssignedVehicleId { get; set; }
     }
 }

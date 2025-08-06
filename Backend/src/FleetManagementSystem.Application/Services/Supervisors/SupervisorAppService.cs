@@ -39,7 +39,16 @@ namespace FleetManagementSystem.Services.Supervisors
 
         public async Task<SupervisorDto> CreateAsync(CreateSupervisorDto input)
         {
+            // Step 1: Create Supervisor first
+            var supervisor = ObjectMapper.Map<Supervisor>(input);
+            supervisor.Id = Guid.NewGuid();
+            supervisor.MunicipalityId = input.MunicipalityId;
+            supervisor.MunicipalityName = input.MunicipalityName;
 
+            await _supervisorRepository.InsertAsync(supervisor);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            // Step 2: Create linked User
             var user = new User
             {
                 UserName = input.Username,
@@ -49,40 +58,27 @@ namespace FleetManagementSystem.Services.Supervisors
                 IsActive = true,
                 MunicipalityId = input.MunicipalityId,
                 MunicipalityName = input.MunicipalityName,
-
+                SupervisorId = supervisor.Id,
+                SupervisorName = $"{input.Name} {input.Surname}"
             };
 
-            if (string.IsNullOrWhiteSpace(user.UserName))
-                throw new UserFriendlyException("Supervisor username is required.");
-
-            if (string.IsNullOrWhiteSpace(user.EmailAddress))
-                throw new UserFriendlyException("Supervisor email is required.");
-
             var result = await _userManager.CreateAsync(user, input.Password);
+            if (!result.Succeeded)
+                throw new UserFriendlyException("User creation failed: " + string.Join(", ", result.Errors));
 
-            var roleName = "Supervisor";
-            if (!await _roleManager.RoleExistsAsync(roleName))
-            {
-                await _roleManager.CreateAsync(new Role
-                {
-                    Name = roleName,
-                    DisplayName = "Supervisor",
-                    IsStatic = true,
-                });
-            }
+            await _userManager.AddToRoleAsync(user, "Supervisor");
+            await CurrentUnitOfWork.SaveChangesAsync();
 
-            await _userManager.AddToRoleAsync(user, roleName);
-
-            var supervisor = ObjectMapper.Map<Supervisor>(input);
-            supervisor.Id = Guid.NewGuid();
+            // Step 3: Update Supervisor with UserId
             supervisor.UserId = user.Id;
-
-            supervisor.MunicipalityId = input.MunicipalityId;
-
-            await _supervisorRepository.InsertAsync(supervisor);
+            await _supervisorRepository.UpdateAsync(supervisor);
+            await CurrentUnitOfWork.SaveChangesAsync();
 
             return ObjectMapper.Map<SupervisorDto>(supervisor);
         }
+
+
+
 
         public async Task<SupervisorDto> UpdateAsync(UpdateSupervisorDto input)
         {
