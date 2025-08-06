@@ -1,105 +1,281 @@
 "use client";
 
-import React from "react";
-import { Table, Typography, Avatar } from "antd";
+import React, { useState, useEffect } from "react";
+import { Table, Typography, Avatar, message, Modal, Space, Button, Card } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useStyles } from "./style/mechanicStyle";
+import { IMechanic } from "@/providers/mechanic-provider/context";
+import { useMechanicState, useMechanicActions } from "@/providers/mechanic-provider";
+import MechanicModal from "@/components/MechanicModal";
+
 
 const { Title } = Typography;
-
-interface Mechanic {
-  id: string;
-  name: string;
-  contact: string;
-  specialization: string;
-  status: "Active" | "Inactive";
-}
 
 const MechanicsPage: React.FC = () => {
   const { styles } = useStyles();
 
-  // Sample data - replace with API or database data
-  const mechanics: Mechanic[] = [
-    {
-      id: "M-001",
-      name: "John Doe",
-      contact: "john.doe@email.com",
-      specialization: "Engine Specialist",
-      status: "Active",
-    },
-    {
-      id: "M-002",
-      name: "Jane Smith",
-      contact: "jane.smith@email.com",
-      specialization: "Brake Specialist",
-      status: "Active",
-    },
-    {
-      id: "M-003",
-      name: "Mike Johnson",
-      contact: "mike.johnson@email.com",
-      specialization: "Oil Change Expert",
-      status: "Inactive",
-    },
-  ];
+  const { mechanics } = useMechanicState();
+  // const { jobCards } = useJobCardState();
+  const { getMechanicList, createMechanic, updateMechanic, deleteMechanic } = useMechanicActions();
 
-  const columns: ColumnsType<Mechanic> = [
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [unassigning, setUnassigning] = useState(false);
+
+  const [mechanicModalVisible, setMechanicModalVisible] = useState(false);
+  const [editRecord, setEditRecord] = useState<IMechanic | null>(null);
+
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [selectedMechanic, setSelectedMechanic] = useState<IMechanic | null>(null);
+
+  const [assignModalVisible, setAssignModalVisible] = useState(false);
+  const [selectedJobCardId, setSelectedJobCardId] = useState<string | null>(null);
+
+  const [municipalityId, setMunicipalityId] = useState<string>("");
+  const [supervisorId, setSupervisorId] = useState<string>("");
+
+  useEffect(() => {
+    const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
+    setMunicipalityId(storedMunicipalityId);
+
+    const storedSupervisorId = sessionStorage.getItem("supervisorId") || "";
+    setSupervisorId(storedSupervisorId);
+
+    if (storedMunicipalityId && storedSupervisorId) {
+      getMechanicList();
+      // getJobCardList();
+    }
+  }, []);
+
+  const openMechanicModal = (record?: IMechanic) => {
+    setEditRecord(record || null);
+    setMechanicModalVisible(true);
+  };
+
+  const closeMechanicModal = (record?: IMechanic) => {
+    setMechanicModalVisible(false);
+    setEditRecord(null);
+  }
+
+  const handleSaveMechanic = async (values: IMechanic) => {
+    setSaving(true);
+    try {
+      const userId = sessionStorage.getItem("userId") || "";
+      const municipalityId = sessionStorage.getItem("municipalityId") || "";
+      const municipalityName = sessionStorage.getItem("municipalityName") || "";
+      const supervisorId = sessionStorage.getItem("supervisorId") || "";
+
+      const mechanic: IMechanic = {
+        ...values,
+        id: editRecord?.id,
+        creatorUserId: editRecord?.creatorUserId ?? userId,
+        municipalityId: editRecord?.municipalityId ?? municipalityId,
+        municipalityName: editRecord?.municipalityName ?? municipalityName,
+        supervisorId: editRecord?.supervisorId ?? supervisorId,
+        assignedJobCardId: editRecord?.assignedJobCardId,
+      };
+
+      if (editRecord) {
+        await updateMechanic(mechanic);
+        message.success(`Updated Mechanic: ${mechanic.name}`);
+      } else {
+        await createMechanic(mechanic);
+        message.success(`Added Mechanic: ${mechanic.name}`);
+      }
+
+      await getMechanicList();
+      closeMechanicModal();
+    } catch (error) {
+      console.error("Error saving mechanic:", error);
+      message.error("Failed to save mechanic");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteMechanic = (id?: string) => {
+    if (!id) return;
+
+    Modal.confirm({
+      title: "Are you sure you want to delete this mechanic?",
+      okText: "Delete",
+      okType: "danger",
+      onOk: async () => {
+        setDeleting(true);
+        try {
+          await deleteMechanic(id);
+          message.success("Mechanic deleted successfully");
+          await getMechanicList();
+        } catch (error) {
+          console.error("Delete error:", error);
+          message.error("Failed to delete mechanic");
+        } finally {
+          setDeleting(false);
+        }
+      },
+    });
+  };
+
+  const openViewModal = (mechanic: IMechanic) => {
+    setSelectedMechanic(mechanic);
+    setViewModalVisible(true);
+  }
+
+  // const handleAssignJobCard = async () => {
+  //   if (!selectedMechanic || !selectedJobCardId) return;
+
+  //   setAssigning(true);
+  //   try {
+  //     const selectedJobCard = jobCards?.find((j) => j.id === selectedJobCardId);
+  //     if (!selectedJobCard) {
+  //       message.error("Selected job card not found.");
+  //       return;
+  //     }
+
+  //     await updateMechanic({
+  //       ...selectedMechanic,
+  //       assignedJobCardId: selectedJobCard.id,
+  //       assignedJobCardNumber: selectedJobCard.jobCardNumber,
+  //     });
+
+  //     await updateJobCard({
+  //       ...selectedMechanic,
+  //       assignedMechanicId: selectedMechanic.id,
+  //     });
+
+  //     message.success("Job Card assigned successfully!");
+  //     await Promise.all([getMechanicList(), getJobCardList()]);
+  //     setAssignModalVisible(false);
+  //     setSelectedJobCardId(null);
+  //     setViewModalVisible(false);
+  //   } catch (error) {
+  //     console.error("Error assigning job card:", error);
+  //     message.error("Failed to assign job card");
+  //   } finally {
+  //     setAssigning(false);
+  //   }
+  // };
+
+  // const handleUnassignJobCard = async () => {
+  //   if (!selectedMechanic || !selectedJobCardId.assignedMechanicId) return;
+
+  //   setUnassigning(true);
+  //   try {
+  //     const jobCardToUnassign = jobCards?.find(
+  //       (j) => j.id === selectedMechanic.assignedJobCardId
+  //     );
+
+  //     await updateMechanic({
+  //       ...selectedMechanic,
+  //       assignedJobCardId: undefined,
+  //     });
+
+  //     if (jobCardToUnassign) {
+  //       await updateJobCard({
+  //         ...jobCardToUnassign,
+  //         assignedMechanicId: undefined,
+  //       });
+  //     }
+
+  //     message.success("Job Card unassigned successfully!");
+  //     await Promise.all([getMechanicList(), getJobCardList()]);
+  //     setViewModalVisible(false);
+  //   } catch (error) {
+  //     console.error("Error unassigning job card:", error);
+  //     message.error("Failed to unassign job card");
+  //   } finally {
+  //     setUnassigning(false);
+  //   }
+  // };
+
+  const filteredMechanics = mechanics?.filter((mec) => mec.municipalityId?.toString() === municipalityId) || [];
+
+  // const unassignedJobCards: IJobCard[] = jobCards?.filter((jc) => !jc.assignedMechanicId && jc.municipalityId?.toString() === municipalityId) || [];
+
+  const columns: ColumnsType<IMechanic> = [
     {
-      title: "Mechanic",
+      title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (name: string) => (
-        <span>
-          <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} />
-          {name}
-        </span>
+      render: (_, record) => (
+        <Space>
+          <Avatar icon={<UserOutlined />} />
+          {record.name}
+        </Space>
       ),
     },
+    { title: "Surname", key: "surname", render: (_, record) => record.surname || "-" },
+    { title: "Email", key: "email", render: (_, record) => record.email || "-" },
+    { title: "Department", key: "department", render: (_, record) => record.department || "-" },
+    { title: "Municipality Name", key: "municipalityName", render: (_, record) => record.municipalityName || "-" },
+    { title: "Assigned Job Card", key: "assignedJobCardId", render: (_, record) => record.assignedJobCardId || "-" },
     {
-      title: "Contact",
-      dataIndex: "contact",
-      key: "contact",
-    },
-    {
-      title: "Specialization",
-      dataIndex: "specialization",
-      key: "specialization",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      filters: [
-        { text: "Active", value: "Active" },
-        { text: "Inactive", value: "Inactive" },
-      ],
-      onFilter: (value: boolean | React.Key, record: Mechanic) => {
-        if (typeof value === "string" || typeof value === "boolean") {
-          return record.status === value;
-        }
-        return false;
-      },
-      render: (status: string) => (
-        <span style={{ color: status === "Active" ? "green" : "red" }}>
-          {status}
-        </span>
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <Button type="link" onClick={() => openViewModal(record)}>
+            View
+          </Button>
+          <Button danger type="link" loading={deleting} onClick={() => handleDeleteMechanic(record.id)}>
+            Delete
+          </Button>
+        </Space>
       ),
     },
   ];
 
   return (
     <div>
-      <Title level={2} style={{ marginBottom: 24 }}>
-        Mechanics
-      </Title>
+      <div className={styles.pageHeader}>
+        <Title level={3} className={styles.pageTitle}>
+          Mechanics
+        </Title>
+        <Button type="primary" onClick={() => openMechanicModal()}>
+          Add Driver
+        </Button>
+      </div>
 
-      <Table<Mechanic>
-        columns={columns}
-        dataSource={mechanics}
-        rowKey="id"
-        className={styles.table}
-        pagination={{ pageSize: 5 }}
+      <Card className={styles.tableCard}>
+        <Table
+          columns={columns}
+          dataSource={filteredMechanics}
+          pagination={{ pageSize: 5 }}
+          rowKey="id"
+          loading={!mechanics}
+        />
+      </Card>
+
+      <MechanicModal
+        open={mechanicModalVisible || viewModalVisible || assignModalVisible}
+        onClose={() => {
+          setMechanicModalVisible(false);
+          setViewModalVisible(false);
+          setAssignModalVisible(false);
+        }}
+        editRecord={editRecord || selectedMechanic}
+        onSave={(mechanic) => {
+          if (viewModalVisible) {
+            setEditRecord(mechanic);
+            setMechanicModalVisible(true);
+            setViewModalVisible(false);
+          } else {
+            handleSaveMechanic(mechanic);
+          }
+        }}
+        isViewMode={viewModalVisible}
+        // jobCards={unassignedJobCards}
+        selectedJobCardId={selectedJobCardId}
+        setSelectedJobCardId={setSelectedJobCardId}
+        // onAssign={handleAssignJobCard}
+        assigning={assigning}
+        // onUnassign={handleUnassignJobCard}
+        unassigning={unassigning}
+        showAssignModal={assignModalVisible}
+        setShowAssignModal={setAssignModalVisible}
+        saving={saving}
       />
     </div>
   );

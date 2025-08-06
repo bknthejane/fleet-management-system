@@ -52,7 +52,7 @@ namespace FleetManagementSystem.Services.JobCards
         public async Task AssignToMechanicAsync(Guid jobCardId, Guid mechanicId)
         {
             var jobCard = await _jobCardRepository.GetAsync(jobCardId);
-            jobCard.MechanicId = mechanicId;
+            jobCard.AssignedMechanicId = mechanicId;
             jobCard.Status = "In Progress";
             await _jobCardRepository.UpdateAsync(jobCard);
         }
