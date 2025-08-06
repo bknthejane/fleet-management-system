@@ -74,6 +74,22 @@ namespace FleetManagementSystem.Services.Drivers
 
         public async Task<DriverDto> CreateAsync(CreateDriverDto input)
         {
+            // 1. Create the Driver first
+            var driver = ObjectMapper.Map<Driver>(input);
+            driver.Id = Guid.NewGuid();
+
+            // Set default unassigned vehicle fields
+            driver.AssignedVehicleId = null;
+            driver.AssignedVehicleFleetNumber = null;
+
+            // Get Municipality name
+            var municipality = await _municipalityRepository.GetAsync(input.MunicipalityId);
+            driver.MunicipalityName = municipality?.Name;
+
+            await _driverRepository.InsertAsync(driver);
+            await CurrentUnitOfWork.SaveChangesAsync(); // Ensure driver is flushed
+
+            // 2. Create the linked User
             var user = new User
             {
                 UserName = input.Username,
@@ -82,11 +98,16 @@ namespace FleetManagementSystem.Services.Drivers
                 Surname = input.Surname,
                 IsActive = true,
                 MunicipalityId = input.MunicipalityId,
-                MunicipalityName = input.MunicipalityName
+                MunicipalityName = driver.MunicipalityName,
+                DriverId = driver.Id,
+                DriverName = $"{input.Name} {input.Surname}"
             };
 
             var result = await _userManager.CreateAsync(user, input.Password);
+            if (!result.Succeeded)
+                throw new UserFriendlyException("User creation failed: " + string.Join(", ", result.Errors));
 
+            // Assign role
             var roleName = "Driver";
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
@@ -99,21 +120,16 @@ namespace FleetManagementSystem.Services.Drivers
             }
             await _userManager.AddToRoleAsync(user, roleName);
 
-            var driver = ObjectMapper.Map<Driver>(input);
-            driver.Id = Guid.NewGuid();
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            // 3. Update driver with UserId
             driver.UserId = user.Id;
-
-            var municipality = await _municipalityRepository.GetAsync(driver.MunicipalityId);
-            driver.MunicipalityName = municipality?.Name;
-
-            driver.AssignedVehicleId = null;
-            driver.AssignedVehicleFleetNumber = null;
-
-            await _driverRepository.InsertAsync(driver);
+            await _driverRepository.UpdateAsync(driver);
             await CurrentUnitOfWork.SaveChangesAsync();
 
             return await GetAsync(driver.Id);
         }
+
 
         public async Task<DriverDto> UpdateAsync(UpdateDriverDto input)
         {

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250805192600_UpdateDBv14")]
+    partial class UpdateDBv14
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1462,9 +1465,6 @@ namespace FleetManagementSystem.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("AssignedVehicleId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("AuthenticationSource")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -1485,12 +1485,6 @@ namespace FleetManagementSystem.Migrations
 
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DriverId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DriverName")
-                        .HasColumnType("text");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
@@ -1656,8 +1650,7 @@ namespace FleetManagementSystem.Migrations
 
                     b.HasIndex("MunicipalityId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Drivers");
                 });
@@ -2339,8 +2332,8 @@ namespace FleetManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("FleetManagementSystem.Authorization.Users.User", "User")
-                        .WithOne("Driver")
-                        .HasForeignKey("FleetManagementSystem.Domain.Drivers.Driver", "UserId");
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("AssignedVehicle");
 
@@ -2560,8 +2553,6 @@ namespace FleetManagementSystem.Migrations
             modelBuilder.Entity("FleetManagementSystem.Authorization.Users.User", b =>
                 {
                     b.Navigation("Claims");
-
-                    b.Navigation("Driver");
 
                     b.Navigation("Logins");
 

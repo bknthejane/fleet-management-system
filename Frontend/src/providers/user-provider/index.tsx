@@ -55,6 +55,9 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
             sessionStorage.setItem("municipalityName", result.municipalityName || "");
             sessionStorage.setItem("municipalityId", result.municipalityId || "");
             sessionStorage.setItem("loggedInUser", result.name || "");
+            sessionStorage.setItem("supervisorId", result.supervisorId || "");
+            sessionStorage.setItem("driverId", result.driverId || "");
+            sessionStorage.setItem("vehicleId", result.assignedVehicleId || "");
 
             dispatch(getUserSuccess(result));
 

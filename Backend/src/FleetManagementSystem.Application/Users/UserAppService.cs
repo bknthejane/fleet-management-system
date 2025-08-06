@@ -18,6 +18,7 @@ using FleetManagementSystem.Authorization;
 using FleetManagementSystem.Authorization.Accounts;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
+using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Roles.Dto;
 using FleetManagementSystem.Users.Dto;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +35,7 @@ namespace FleetManagementSystem.Users
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
+        private readonly IRepository<Driver, Guid> _driverRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -42,7 +44,8 @@ namespace FleetManagementSystem.Users
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
             IAbpSession abpSession,
-            LogInManager logInManager)
+            LogInManager logInManager,
+            IRepository<Driver, Guid> driverRepository)
             : base(repository)
         {
             _userManager = userManager;
@@ -51,6 +54,7 @@ namespace FleetManagementSystem.Users
             _passwordHasher = passwordHasher;
             _abpSession = abpSession;
             _logInManager = logInManager;
+            _driverRepository = driverRepository;
         }
 
         public override async Task<UserDto> CreateAsync(CreateUserDto input)
@@ -149,14 +153,21 @@ namespace FleetManagementSystem.Users
         protected override UserDto MapToEntityDto(User user)
         {
             var roleIds = user.Roles.Select(x => x.RoleId).ToArray();
-
             var roles = _roleManager.Roles.Where(r => roleIds.Contains(r.Id)).Select(r => r.NormalizedName);
-
             var userDto = base.MapToEntityDto(user);
             userDto.RoleNames = roles.ToArray();
 
+            // 👇 Add driver info
+            var driver = _driverRepository.GetAll().FirstOrDefault(d => d.UserId == user.Id);
+            if (driver != null)
+            {
+                userDto.DriverId = driver.Id;
+                userDto.AssignedVehicleId = driver.AssignedVehicleId;
+            }
+
             return userDto;
         }
+
 
         protected override IQueryable<User> CreateFilteredQuery(PagedUserResultRequestDto input)
         {

@@ -55,6 +55,12 @@ const MunicipalityLayout: React.FC<MunicipalityLayoutProps> = ({ children }) => 
       label: "Vehicles",
       onClick: () => router.push("/municipality/vehicles"),
     },
+    {
+      key: "users",
+      icon: <UserOutlined />,
+      label: "Users",
+      onClick: () => router.push("/municipality/users"),
+    },
   ];
 
   const handleLogout = () => {

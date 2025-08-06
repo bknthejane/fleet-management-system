@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FleetManagementSystem.Migrations
 {
     [DbContext(typeof(FleetManagementSystemDbContext))]
-    partial class FleetManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250805203428_UpdateDBv15")]
+    partial class UpdateDBv15
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1461,9 +1464,6 @@ namespace FleetManagementSystem.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
-
-                    b.Property<Guid?>("AssignedVehicleId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("AuthenticationSource")
                         .HasMaxLength(64)
