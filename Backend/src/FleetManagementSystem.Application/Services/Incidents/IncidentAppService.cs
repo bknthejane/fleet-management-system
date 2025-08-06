@@ -106,11 +106,41 @@ namespace FleetManagementSystem.Services.Incidents
         public async Task<IncidentDto> UpdateAsync(UpdateIncidentDto input)
         {
             var entity = await _incidentRepository.GetAsync(input.Id);
+
+            var mapping = IncidentTypes.FirstOrDefault(t => t.Type == input.IncidentType);
+            if (mapping == default)
+                throw new UserFriendlyException("Invalid Incident Type");
+
+            entity.Department = mapping.Department;
+
             ObjectMapper.Map(input, entity);
+
+            var supervisor = _supervisorRepository.GetAll()
+                .FirstOrDefault(s => s.Department == mapping.Department && s.MunicipalityId == input.MunicipalityId);
+
+            if (supervisor == null)
+                throw new UserFriendlyException($"No supervisor found for department: {mapping.Department}");
+
+            var jobCard = _jobCardRepository.GetAll()
+                .FirstOrDefault(jc => jc.IncidentId == entity.Id);
+
+            if (jobCard != null)
+            {
+                jobCard.SupervisorId = supervisor.Id;
+                await _jobCardRepository.UpdateAsync(jobCard);
+            }
+
             await _incidentRepository.UpdateAsync(entity);
 
-            return ObjectMapper.Map<IncidentDto>(entity);
+            var dto = ObjectMapper.Map<IncidentDto>(entity);
+            if (jobCard != null)
+            {
+                dto.JobCardId = jobCard.Id;
+            }
+
+            return dto;
         }
+
 
         public async Task DeleteAsync(Guid id)
         {

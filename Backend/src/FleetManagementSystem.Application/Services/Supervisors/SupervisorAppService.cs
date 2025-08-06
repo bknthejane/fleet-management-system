@@ -39,7 +39,6 @@ namespace FleetManagementSystem.Services.Supervisors
 
         public async Task<SupervisorDto> CreateAsync(CreateSupervisorDto input)
         {
-            // Step 1: Create Supervisor first
             var supervisor = ObjectMapper.Map<Supervisor>(input);
             supervisor.Id = Guid.NewGuid();
             supervisor.MunicipalityId = input.MunicipalityId;
@@ -48,7 +47,6 @@ namespace FleetManagementSystem.Services.Supervisors
             await _supervisorRepository.InsertAsync(supervisor);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Step 2: Create linked User
             var user = new User
             {
                 UserName = input.Username,
@@ -69,7 +67,6 @@ namespace FleetManagementSystem.Services.Supervisors
             await _userManager.AddToRoleAsync(user, "Supervisor");
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Step 3: Update Supervisor with UserId
             supervisor.UserId = user.Id;
             await _supervisorRepository.UpdateAsync(supervisor);
             await CurrentUnitOfWork.SaveChangesAsync();

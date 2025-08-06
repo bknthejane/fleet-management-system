@@ -1710,6 +1710,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<string>("MunicipalityName")
                         .HasColumnType("text");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid");
 
@@ -2400,7 +2403,7 @@ namespace FleetManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("FleetManagementSystem.Domain.Supervisors.Supervisor", "Supervisor")
-                        .WithMany()
+                        .WithMany("JobCards")
                         .HasForeignKey("SupervisorId");
 
                     b.HasOne("FleetManagementSystem.Domain.Vehicles.Vehicle", "Vehicle")
@@ -2585,6 +2588,11 @@ namespace FleetManagementSystem.Migrations
                     b.Navigation("Supervisor");
 
                     b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("FleetManagementSystem.Domain.Supervisors.Supervisor", b =>
+                {
+                    b.Navigation("JobCards");
                 });
 #pragma warning restore 612, 618
         }

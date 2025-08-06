@@ -13,6 +13,6 @@ namespace FleetManagementSystem.Services.JobCards.Dto
         public string Priority { get; set; }
         public DateTime DateOpened { get; set; }
         public DateTime? DateCompleted { get; set; }
-        public Guid? MechanicId { get; set; }
+        public Guid? AssignedMechanicId { get; set; }
     }
 }
