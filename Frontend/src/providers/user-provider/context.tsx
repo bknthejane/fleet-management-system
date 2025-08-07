@@ -10,6 +10,7 @@ export interface IUser {
   municipalityId?: string;
   municipalityName?: string;
   userId?: string;
+  password?: string;
 }
 
 export interface IUserStateContext {
@@ -23,6 +24,7 @@ export interface IUserStateContext {
 export interface IUserActionContext {
   getUserList: () => void;
   getUser: (id: string) => Promise<IUser>;
+  changePassword: (user: IUser) => void;
   updateUser: (user: IUser) => void;
   deleteUser: (id: string) => void;
 }

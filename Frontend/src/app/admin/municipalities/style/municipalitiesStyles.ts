@@ -1,43 +1,47 @@
-import { createStyles } from "antd-style";
+import { createStyles, css } from "antd-style";
 
-export const useStyles = createStyles(({ token }) => {
-  return {
-    container: {
-      padding: 24,
-      minHeight: "100%",
-      backgroundColor: token.colorBgLayout,
-    },
+export const useStyles = createStyles({
+    container: css`
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+    `,
 
-    card: {
-      borderRadius: 12,
-      boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
-    },
+    header: css`
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
 
-    headerSection: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    `,
 
-    title: {
-      margin: 0,
-      fontWeight: 600,
-    },
+    searchBar: css`
+        width: 300px;
+        @media (max-width: 768px) {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+    `,
 
-    addButton: {
-      borderRadius: 6,
-      padding: "0 16px",
-    },
+    addButton: css`
+        background-color: #f3f4f6 !important;
+        color: #6b7280 !important;
+        border-color: #e5e7eb !important;
 
-    table: {
-      borderRadius: 12,
-      overflow: "hidden",
-      backgroundColor: token.colorBgContainer,
-    },
+        &:hover {
+            background-color: #e5e7eb !important;
+            color: #374151 !important;
+        }
 
-    modalForm: {
-      marginTop: 8,
-    },
-  };
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+    `,
+    modalForm: css`
+        margin-top: 24px;
+    `,
 });

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Form, Input, Button, Typography, Row, Col } from "antd/es";
 import { IMunicipality } from "@/providers/municipality-provider/context";
 import { useStyles } from "../app/admin/municipalities/style/municipalitiesStyles";
@@ -20,6 +20,7 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
 }) => {
   const { styles } = useStyles();
   const [form] = Form.useForm<IMunicipality>();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (editRecord) {
@@ -31,6 +32,7 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
 
   const handleSubmit = async () => {
     try {
+      setIsLoading(true);
       const values = await form.validateFields();
 
       const creatorId = sessionStorage.getItem("userId") || "";
@@ -51,6 +53,8 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
       onSave(payload);
     } catch (error) {
       console.error("Validation failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,8 +64,12 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
       open={open}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" onClick={onClose}>Cancel</Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>Submit</Button>,
+        <Button key="cancel" onClick={onClose} disabled={isLoading}>
+          Cancel
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit} loading={isLoading}>
+          Submit
+        </Button>,
       ]}
       width={900}
     >
@@ -72,7 +80,7 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
         autoComplete="off"
       >
         <Row gutter={32}>
-          <Col span={12}>
+          <Col span={editRecord ? 24 : 12}>
             <Title level={5}>Municipality Info</Title>
             <Form.Item name="name" label="Name" rules={[{ required: true }]}>
               <Input />
@@ -91,18 +99,20 @@ const MunicipalityModal: React.FC<MunicipalityModalProps> = ({
             </Form.Item>
           </Col>
 
-          <Col span={12}>
-            <Title level={5}>Admin Account Info</Title>
-            <Form.Item name="adminUserName" label="Admin Username" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="adminEmail" label="Admin Email" rules={[{ required: true, type: "email" }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="adminPassword" label="Admin Password" rules={[{ required: true, min: 6 }]}>
-              <Input.Password />
-            </Form.Item>
-          </Col>
+          {!editRecord && (
+            <Col span={12}>
+              <Title level={5}>Admin Account Info</Title>
+              <Form.Item name="adminUserName" label="Admin Username" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="adminEmail" label="Admin Email" rules={[{ required: true, type: "email" }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="adminPassword" label="Admin Password" rules={[{ required: true, min: 6 }]}>
+                <Input.Password />
+              </Form.Item>
+            </Col>
+          )}
         </Row>
       </Form>
     </Modal>

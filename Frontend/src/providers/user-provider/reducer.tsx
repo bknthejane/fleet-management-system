@@ -52,5 +52,17 @@ export const UserReducer = handleActions<IUserStateContext, IUserStateContext>(
             ...state,
             ...action.payload,
         }),
+        [UserActionEnums.changePasswordPending]: (state, action) => ({
+            ...state,
+            ...action.payload,
+        }),
+        [UserActionEnums.changePasswordSuccess]: (state, action) => ({
+            ...state,
+            ...action.payload,
+        }),
+        [UserActionEnums.changePasswordError]: (state, action) => ({
+            ...state,
+            ...action.payload,
+        }),
     }, INITIAL_STATE
 );

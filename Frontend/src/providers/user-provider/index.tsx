@@ -21,6 +21,9 @@ import {
     deleteUserPending,
     deleteUserSuccess,
     deleteUserError,
+    changePasswordPending,
+    changePasswordSuccess,
+    changePasswordError
 } from "./actions";
 
 export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
@@ -100,6 +103,20 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
             });
     };
 
+    const changePassword = async (User: IUser) => {
+        dispatch(changePasswordPending());
+        const endpoint = `/services/app/User/ResetPassword`;
+        await instance
+            .post(endpoint, User)
+            .then((response) => {
+                dispatch(changePasswordSuccess(response.data));
+            })
+            .catch((error) => {
+                console.error(error);
+                dispatch(changePasswordError())
+            });
+    };
+
     return (
         <UserStateContext.Provider value={state}>
             <UserActionContext.Provider
@@ -108,6 +125,7 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
                     getUser,
                     updateUser,
                     deleteUser,
+                    changePassword
                 }}
             >
                 {children}

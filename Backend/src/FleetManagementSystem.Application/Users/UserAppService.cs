@@ -239,23 +239,25 @@ namespace FleetManagementSystem.Users
             {
                 throw new UserFriendlyException("Please log in before attempting to reset password.");
             }
-            
+
             var currentUser = await _userManager.GetUserByIdAsync(_abpSession.GetUserId());
             var loginAsync = await _logInManager.LoginAsync(currentUser.UserName, input.AdminPassword, shouldLockout: false);
             if (loginAsync.Result != AbpLoginResultType.Success)
             {
-                throw new UserFriendlyException("Your 'Admin Password' did not match the one on record.  Please try again.");
+                throw new UserFriendlyException("Your 'Admin Password' did not match the one on record. Please try again.");
             }
-            
+
             if (currentUser.IsDeleted || !currentUser.IsActive)
             {
                 return false;
             }
-            
+
             var roles = await _userManager.GetRolesAsync(currentUser);
-            if (!roles.Contains(StaticRoleNames.Tenants.Admin))
+            var allowedRoles = new[] { "Admin", "MunicipalityAdmin", "Supervisor" };
+
+            if (!roles.Any(role => allowedRoles.Contains(role)))
             {
-                throw new UserFriendlyException("Only administrators may reset passwords.");
+                throw new UserFriendlyException("You are not authorized to reset passwords.");
             }
 
             var user = await _userManager.GetUserByIdAsync(input.UserId);
@@ -264,6 +266,9 @@ namespace FleetManagementSystem.Users
                 user.Password = _passwordHasher.HashPassword(user, input.NewPassword);
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
+
+            return true;
+
 
             return true;
         }
