@@ -17,6 +17,10 @@ export enum UserActionEnums {
     deleteUserPending = 'DELETE_USER_PENDING',
     deleteUserSuccess = 'DELETE_USER_SUCCESS',
     deleteUserError = 'DELETE_USER_ERROR',
+
+    changePasswordPending = 'CHANGE_PASSWORD_PENDING',
+    changePasswordSuccess = 'CHANGE_PASSWORD_SUCCESS',
+    changePasswordError = 'CHANGE_PASSWORD_ERROR',
 }
 
 export const getUserListPending = createAction<IUserStateContext>(
@@ -129,5 +133,36 @@ export const deleteUserError = createAction<IUserStateContext>(
             isSuccess: false,
             isError: true,
         })
+);
+
+export const changePasswordPending = createAction<IUserStateContext>(
+    UserActionEnums.changePasswordPending, () => (
+        {
+            isPending: true,
+            isSuccess: false,
+            isError: false,
+        }
+    )
+);
+
+export const changePasswordSuccess = createAction<IUserStateContext, IUser>(
+    UserActionEnums.changePasswordSuccess, (User: IUser) => (
+        {
+            isPending: false,
+            isSuccess: true,
+            isError: false,
+            User,
+        }
+    )
+);
+
+export const changePasswordError = createAction<IUserStateContext>(
+    UserActionEnums.changePasswordError, () => (
+        {
+            isPending: false,
+            isSuccess: false,
+            isError: true,
+        }
+    )
 );
 

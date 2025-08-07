@@ -1,31 +1,41 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react";
-import { Table, Button, Card, Typography, Modal, Form, Input, Space, Tag, message } from "antd";
-import { EditOutlined, DeleteOutlined, KeyOutlined } from "@ant-design/icons";
+import { Table, Button, Card, Typography, Modal, Space, Tag, message, Input, Form } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import {
+  PlusOutlined,
+  EditOutlined,
+  LockOutlined,
+} from "@ant-design/icons";
 import { useUserState, useUserActions } from "@/providers/user-provider";
 import { IUser } from "@/providers/user-provider/context";
+import { useStyles } from "./style/usersStyles";
 
 const { Title } = Typography;
+const { Search } = Input;
 
 const UsersPage: React.FC = () => {
+  const { styles } = useStyles();
   const { users } = useUserState();
-  const { getUserList, updateUser, deleteUser } = useUserActions();
+  const { getUserList, updateUser, changePassword } = useUserActions();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPasswordModal, setIsPasswordModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [form] = Form.useForm();
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     getUserList();
-  }, ['']);
+  }, []);
 
   const usersArray: IUser[] = Array.isArray(users)
     ? users
     : ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.items ??
-      ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
-      [];
+    ((users as unknown) as { items?: IUser[]; result?: IUser[] })?.result ??
+    [];
 
   const municipalityAdmins = usersArray.filter((user) =>
     user.roleNames?.includes("MUNICIPALITYADMIN")
@@ -50,15 +60,29 @@ const UsersPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async () => {
+  const handleModalSubmit = async () => {
     if (!currentUser) return;
+    setIsLoading(true);
 
     try {
       const values = await form.validateFields();
 
       if (isPasswordModal) {
+        const payload = {
+          userId: currentUser.id,
+          newPassword: values.password,
+          adminPassword: prompt("Please enter your admin password to confirm:")
+        };
+
+        if (!payload.adminPassword) {
+          message.error("Password change cancelled. Admin password is required.");
+          return;
+        }
+
+        await changePassword(payload);
         message.success(`Password updated for ${currentUser.userName}`);
-      } else {
+      }
+      else {
         await updateUser({ ...currentUser, ...values });
         message.success(`User ${values.userName} updated successfully`);
       }
@@ -68,47 +92,26 @@ const UsersPage: React.FC = () => {
     } catch (err) {
       console.error("Error:", err);
       message.error("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = (id: string) => {
-    Modal.confirm({
-      title: "Delete this user?",
-      content: "This action cannot be undone.",
-      okText: "Delete",
-      okType: "danger",
-      onOk: async () => {
-        try {
-          await deleteUser(id);
-          getUserList();
-          message.success("User deleted successfully");
-        } catch (err) {
-          console.error("Error deleting user:", err);
-          message.error("Failed to delete user");
-        }
-      },
-    });
-  };
+  const filteredUsers = municipalityAdmins.filter(user =>
+    user.userName?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user.surname?.toLowerCase().includes(searchText.toLowerCase())
+  );
 
-  const columns = [
-    {
-      title: "Username",
-      dataIndex: "userName",
-      key: "userName",
-      render: (text: string) => text || "-",
-    },
+  const columns: ColumnsType<IUser> = [
+    { title: "Username", dataIndex: "userName", key: "userName" },
     {
       title: "Full Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => text || "-",
+      render: (_, record) => `${record.name}`,
     },
-    {
-      title: "Email",
-      dataIndex: "emailAddress",
-      key: "emailAddress",
-      render: (text: string) => text || "-",
-    },
+    { title: "Email", dataIndex: "emailAddress", key: "emailAddress" },
     {
       title: "Roles",
       dataIndex: "roleNames",
@@ -129,7 +132,7 @@ const UsersPage: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_: unknown, user: IUser) => (
+      render: (_, user: IUser) => (
         <Space>
           <Button
             icon={<EditOutlined />}
@@ -137,16 +140,9 @@ const UsersPage: React.FC = () => {
             title="Edit User"
           />
           <Button
-            icon={<KeyOutlined />}
+            icon={<LockOutlined />}
             onClick={() => openPasswordModal(user)}
             title="Change Password"
-          />
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(user.id!)}
-            title="Delete User"
-            disabled={!user.id}
           />
         </Space>
       ),
@@ -154,33 +150,40 @@ const UsersPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
-      <Card>
-        <Title level={3}>Municipality Admins</Title>
+    <div className={styles.container}>
+      <Card className={styles.card}>
+        <div className={styles.headerSection}>
+          <Title level={3} className={styles.title}>Municipality Admins</Title>
+          <Space>
+            <Search
+              placeholder="Search users"
+              allowClear
+              onSearch={setSearchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </Space>
+        </div>
 
         <Table
           columns={columns}
-          dataSource={municipalityAdmins}
+          dataSource={filteredUsers}
           rowKey="id"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-          }}
+          pagination={{ pageSize: 5 }}
           bordered
           loading={!users}
+          scroll={{ x: 'max-content' }}
         />
       </Card>
 
       <Modal
         title={isPasswordModal ? "Change Password" : "Edit User"}
         open={isModalOpen}
-        onOk={handleSubmit}
+        onOk={handleModalSubmit}
         onCancel={() => setIsModalOpen(false)}
         okText={isPasswordModal ? "Update Password" : "Save"}
+        confirmLoading={isLoading}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" className={styles.modalForm}>
           {isPasswordModal ? (
             <>
               <Form.Item

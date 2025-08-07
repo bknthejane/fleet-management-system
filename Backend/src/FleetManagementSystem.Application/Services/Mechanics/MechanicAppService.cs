@@ -126,7 +126,6 @@ namespace FleetManagementSystem.Services.Mechanics
             await _mechanicRepository.UpdateAsync(mechanic);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            //return ObjectMapper.Map<MechanicDto>(mechanic);
             return await GetAsync(mechanic.Id);
         }
 

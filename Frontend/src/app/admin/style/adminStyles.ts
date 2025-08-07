@@ -3,11 +3,11 @@ import { createStyles, css } from "antd-style";
 export const useStyles = createStyles({
   layout: css`
     min-height: 100vh;
-    background: #f5f7fa;
+    background: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #3f3f46) !important;
   `,
 
   sidebar: css`
-    background: #6b7685 !important;
+    background: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #3f3f46); !important;
     position: relative;
     
     .ant-layout-sider-children {
@@ -67,20 +67,6 @@ export const useStyles = createStyles({
     font-size: 16px;
     display: block;
     margin-bottom: 4px;
-  `,
-
-  onlineStatus: css`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  `,
-
-  statusDot: css`
-    width: 8px;
-    height: 8px;
-    background: #52c41a;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.3);
   `,
 
   menu: css`
