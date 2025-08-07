@@ -10,6 +10,7 @@ import { DriverProvider } from "@/providers/driver-provider";
 import { MechanicProvider } from "@/providers/mechanic-provider";
 import { IncidentProvider } from "@/providers/incident-provider";
 import { App } from "antd/es";
+import { JobCardProvider } from "@/providers/jobCard-provider";
 
 export const metadata: Metadata = {
   title: "DriveOps: Fleet Management System",
@@ -25,23 +26,25 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <App>
-          <IncidentProvider>
-            <MechanicProvider>
-              <DriverProvider>
-                <VehicleProvider>
-                  <SupervisorProvider>
-                    <MunicipalityProvider>
-                      <UsersProvider>
-                        <AuthProvider>
-                          {children}
-                        </AuthProvider>
-                      </UsersProvider>
-                    </MunicipalityProvider>
-                  </SupervisorProvider>
-                </VehicleProvider>
-              </DriverProvider>
-            </MechanicProvider>
-          </IncidentProvider>
+          <JobCardProvider>
+            <IncidentProvider>
+              <MechanicProvider>
+                <DriverProvider>
+                  <VehicleProvider>
+                    <SupervisorProvider>
+                      <MunicipalityProvider>
+                        <UsersProvider>
+                          <AuthProvider>
+                            {children}
+                          </AuthProvider>
+                        </UsersProvider>
+                      </MunicipalityProvider>
+                    </SupervisorProvider>
+                  </VehicleProvider>
+                </DriverProvider>
+              </MechanicProvider>
+            </IncidentProvider>
+          </JobCardProvider>
         </App>
       </body>
     </html>

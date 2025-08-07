@@ -13,7 +13,7 @@ import {
     message,
 } from "antd";
 import { IMechanic } from "@/providers/mechanic-provider/context";
-// import { IJobCard } from "@/providers/jobCard-provider/context";
+import { IJobCard } from "@/providers/jobCard-provider/context";
 import { useStyles } from "@/app/admin/municipalities/style/municipalitiesStyles";
 
 const { Title } = Typography;
@@ -34,7 +34,7 @@ interface MechanicModalProps {
     onSave: (values: IMechanic) => void;
 
     isViewMode?: boolean;
-    // jobCards?: IJobCard[];
+    jobCards?: IJobCard[];
     selectedJobCardId?: string | null;
     setSelectedJobCardId?: (id: string | null) => void;
     onAssign?: () => void;
@@ -52,7 +52,7 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
     editRecord,
     onSave,
     isViewMode = false,
-    // jobCards = [],
+    jobCards = [],
     selectedJobCardId,
     setSelectedJobCardId,
     onAssign,
@@ -252,7 +252,7 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
                     </Button>,
                 ]}
             >
-                {/* {jobCards.length === 0 ? (
+                {jobCards.length === 0 ? (
                     <p>No unassigned vehicles available</p>
                 ) : (
                     <Form layout="vertical">
@@ -269,7 +269,7 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
                             </Select>
                         </Form.Item>
                     </Form>
-                )} */}
+                )}
             </Modal>
         </>
     );

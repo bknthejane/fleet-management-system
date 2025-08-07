@@ -1,86 +1,113 @@
 "use client";
 
-import React from "react";
-import { Table, Typography, Button, Space } from "antd";
+import React, { useState, useEffect } from "react";
+import { Table, Typography, Button, Space, message, Card } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useStyles } from "./style/mechanicJobCardStyle";
+import { IJobCard } from "@/providers/jobCard-provider/context";
+import { useJobCardState, useJobCardActions } from "@/providers/jobCard-provider";
+import MechanicJobCardModal from "@/components/MechanicJobCardModal";
 
 const { Title } = Typography;
-
-interface JobCard {
-  id: string;
-  vehicle: string;
-  issue: string;
-  status: "Pending" | "In Progress" | "Completed";
-  dateCreated: string;
-}
 
 const MechanicJobCards: React.FC = () => {
   const { styles } = useStyles();
 
-  const jobCards: JobCard[] = [
-    {
-      id: "JC-201",
-      vehicle: "Toyota Hilux",
-      issue: "Engine repair",
-      status: "In Progress",
-      dateCreated: "2025-07-28",
-    },
-    {
-      id: "JC-202",
-      vehicle: "Ford Ranger",
-      issue: "Brake replacement",
-      status: "Completed",
-      dateCreated: "2025-07-25",
-    },
-    {
-      id: "JC-203",
-      vehicle: "Isuzu D-Max",
-      issue: "Oil change",
-      status: "Pending",
-      dateCreated: "2025-07-20",
-    },
-  ];
+  const { jobCards } = useJobCardState();
+  const { getJobCardList, createJobCard, updateJobCard } = useJobCardActions();
 
-  const columns: ColumnsType<JobCard> = [
-    { title: "Job Card ID", dataIndex: "id", key: "id" },
-    { title: "Vehicle", dataIndex: "vehicle", key: "vehicle" },
-    { title: "Issue", dataIndex: "issue", key: "issue" },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      filters: [
-        { text: "Pending", value: "Pending" },
-        { text: "In Progress", value: "In Progress" },
-        { text: "Completed", value: "Completed" },
-      ],
-      onFilter: (value, record) => record.status === (value as JobCard["status"]),
-      render: (status: JobCard["status"]) => (
-        <span
-          style={{
-            color:
-              status === "Completed"
-                ? "green"
-                : status === "In Progress"
-                ? "#f5a623"
-                : "red",
-          }}
-        >
-          {status}
-        </span>
-      ),
-    },
-    { title: "Date Created", dataIndex: "dateCreated", key: "dateCreated" },
+  const [jobCardModalVisible, setJobCardModalVisible] = useState(false);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+
+  const [editRecord, setEditRecord] = useState<IJobCard | null>(null);
+  const [selectedJobCard, setSelectedJobCard] = useState<IJobCard | null>(null);
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
+
+  const [saving, setSaving] = useState(false);
+
+  const [mechanicId, setMechanicId] = useState<string>("");
+
+  useEffect(() => {
+    const storedMechanicId = sessionStorage.getItem("mechanicId") || "";
+    setMechanicId(storedMechanicId);
+
+    if (storedMechanicId) {
+      getJobCardList();
+    }
+  }, []);
+
+  const openJobCardModal = (record?: IJobCard) => {
+    setEditRecord(record || null);
+    setJobCardModalVisible(true);
+  }
+
+  const openViewModal = (jobCard: IJobCard) => {
+    setSelectedJobCard(jobCard);
+    setSelectedMechanicId(jobCard.assignedMechanicId || null);
+    setViewModalVisible(true);
+  };
+
+  const closeAllModals = () => {
+    setJobCardModalVisible(false);
+    setViewModalVisible(false);
+    setEditRecord(null);
+    setSelectedJobCard(null);
+  };
+
+
+  const handleSaveJobCard = async (values: IJobCard) => {
+    setSaving(true);
+    try {
+      const userId = sessionStorage.getItem("userId") || "";
+      const vehicleId = sessionStorage.getItem("vehicleId") || "";
+      const driverId = sessionStorage.getItem("driverId") || "";
+      const supervisorId = sessionStorage.getItem("supervisorId") || "";
+      const mechanicId = sessionStorage.getItem("mechanicId") || "";
+
+      const jobCard: IJobCard = {
+        ...values,
+        id: editRecord?.id,
+        creatorUserId: editRecord?.creatorUserId ?? userId,
+        supervisorId: editRecord?.supervisorId ?? supervisorId,
+        vehicleId: editRecord?.vehicleId ?? vehicleId,
+        driverId: editRecord?.driverId ?? driverId,
+        incidentId: editRecord?.incidentId,
+        assignedMechanicId: editRecord?.assignedMechanicId ?? mechanicId,
+      };
+
+      if (editRecord) {
+        await updateJobCard(jobCard);
+        message.success(`Updated JobCard: ${jobCard.jobCardNumber}`);
+      } else {
+        await createJobCard(jobCard);
+        message.success(`Added JobCard: ${jobCard.jobCardNumber}`);
+      }
+
+      await getJobCardList();
+      closeAllModals();
+    } catch (error) {
+      console.error("Error saving JobCard:", error);
+      message.error("Failed to save JobCard");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filteredJobCards = jobCards?.filter((jc) => jc.assignedMechanicId?.toString() === mechanicId) || [];
+
+
+  const columns: ColumnsType<IJobCard> = [
+    { title: "JobCard Number", key: "jobCardnNumber", render: (_, r) => r.jobCardNumber || "-" },
+    { title: "Notes", key: "notes", render: (_, r) => r.notes || "-" },
+    { title: "Priority", key: "priority", render: (_, r) => r.priority || "-" },
+    { title: "Status", key: "status", render: (_, r) => r.status || "-" },
+    { title: "Assigned Mechanic", key: "assignedMechanic", render: (_, r) => r.assignedMechanicName || "-" },
     {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <Space size="middle">
-          <Button type="link">View</Button>
-          <Button type="link" danger>
-            Delete
-          </Button>
+        <Space>
+          <Button type="link" onClick={() => openViewModal(record)}>View</Button>
         </Space>
       ),
     },
@@ -88,16 +115,37 @@ const MechanicJobCards: React.FC = () => {
 
   return (
     <div>
-      <Title level={2} style={{ marginBottom: 24 }}>
-        Job Cards
-      </Title>
+      <div className={styles.pageHeader}>
+        <Title level={3} className={styles.pageTitle}>
+          Job Cards
+        </Title>
+      </div>
 
-      <Table<JobCard>
-        columns={columns}
-        dataSource={jobCards}
-        rowKey="id"
-        className={styles.table}
-        pagination={{ pageSize: 5 }}
+      <Card className={styles.tableCard}>
+        <Table
+          columns={columns}
+          dataSource={filteredJobCards}
+          rowKey="id"
+          pagination={{ pageSize: 5 }}
+          loading={!jobCards}
+        />
+      </Card>
+
+      <MechanicJobCardModal
+        open={jobCardModalVisible || viewModalVisible}
+        onClose={closeAllModals}
+        editRecord={editRecord || selectedJobCard}
+        onSave={(jobCard) => {
+          if (viewModalVisible) {
+            setEditRecord(jobCard);
+            setJobCardModalVisible(true);
+            setViewModalVisible(false);
+          } else {
+            handleSaveJobCard(jobCard);
+          }
+        }}
+        isViewMode={viewModalVisible}
+        saving={saving}
       />
     </div>
   );

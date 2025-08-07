@@ -13,9 +13,6 @@ namespace FleetManagementSystem.Services.Drivers.Dto
         public Guid MunicipalityId { get; set; }
 
         public string MunicipalityName { get; set; }
-
-        //public Guid? AssignedVehicleId { get; set; }
-
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }

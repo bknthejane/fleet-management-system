@@ -51,6 +51,7 @@ const SupervisorLayout: React.FC<SupervisorLayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = () => {
+    sessionStorage.clear();
     router.push("/login");
   };
 

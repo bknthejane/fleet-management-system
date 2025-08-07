@@ -6,6 +6,10 @@ using Abp.Domain.Repositories;
 using FleetManagementSystem.Domain.JobCards;
 using FleetManagementSystem.Domain.Incidents;
 using FleetManagementSystem.Services.JobCards.Dto;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using Abp.EntityFrameworkCore.Repositories;
+using FleetManagementSystem.Domain.Mechanics;
 
 namespace FleetManagementSystem.Services.JobCards
 {
@@ -13,20 +17,37 @@ namespace FleetManagementSystem.Services.JobCards
     {
         private readonly IRepository<JobCard, Guid> _jobCardRepository;
         private readonly IRepository<Incident, Guid> _incidentRepository;
+        private readonly IRepository<Mechanic, Guid> _mechanicRepository;
 
         public JobCardAppService(
             IRepository<JobCard, Guid> jobCardRepository,
-            IRepository<Incident, Guid> incidentRepository)
+            IRepository<Incident, Guid> incidentRepository,
+            IRepository<Mechanic, Guid> mechanicRepository)
         {
             _jobCardRepository = jobCardRepository;
             _incidentRepository = incidentRepository;
+            _mechanicRepository = mechanicRepository;
         }
 
         public async Task<List<JobCardDto>> GetAllAsync()
         {
-            var entities = await _jobCardRepository.GetAllListAsync();
-            return ObjectMapper.Map<List<JobCardDto>>(entities);
+            var entities = await _jobCardRepository
+                .GetAllIncluding(j => j.AssignedMechanic)
+                .ToListAsync();
+
+            var dtos = ObjectMapper.Map<List<JobCardDto>>(entities);
+
+            foreach (var dto in dtos)
+            {
+                var jobCard = entities.First(j => j.Id == dto.Id);
+                dto.AssignedMechanicName = jobCard.AssignedMechanic != null
+                    ? $"{jobCard.AssignedMechanic.Name} {jobCard.AssignedMechanic.Surname}"
+                    : null;
+            }
+
+            return dtos;
         }
+
 
         public async Task<JobCardDto> GetAsync(Guid id)
         {
@@ -53,7 +74,20 @@ namespace FleetManagementSystem.Services.JobCards
 
             ObjectMapper.Map(input, jobCard);
 
-            // Handle status changes
+            if (jobCard.AssignedMechanicId.HasValue)
+            {
+                var mechanic = await _mechanicRepository
+                    .FirstOrDefaultAsync(m => m.Id == jobCard.AssignedMechanicId.Value);
+
+                jobCard.AssignedMechanicName = mechanic != null
+                    ? $"{mechanic.Name} {mechanic.Surname}"
+                    : null;
+            }
+            else
+            {
+                jobCard.AssignedMechanicName = null;
+            }
+
             switch (input.Status)
             {
                 case "Assigned":
@@ -61,7 +95,7 @@ namespace FleetManagementSystem.Services.JobCards
                     if (jobCard.IncidentId != Guid.Empty)
                     {
                         var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
-                        incident.Status = "Assigned";
+                        incident.Status = "In Progress";
                         await _incidentRepository.UpdateAsync(incident);
                     }
                     break;
@@ -72,7 +106,7 @@ namespace FleetManagementSystem.Services.JobCards
                     if (jobCard.IncidentId != Guid.Empty)
                     {
                         var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
-                        incident.Status = "Done";
+                        incident.Status = "In Progress";
                         await _incidentRepository.UpdateAsync(incident);
                     }
                     break;
@@ -83,7 +117,7 @@ namespace FleetManagementSystem.Services.JobCards
                     if (jobCard.IncidentId != Guid.Empty)
                     {
                         var incident = await _incidentRepository.GetAsync(jobCard.IncidentId);
-                        incident.Status = "Closed";
+                        incident.Status = "Resolved";
                         await _incidentRepository.UpdateAsync(incident);
                     }
                     break;
@@ -95,6 +129,7 @@ namespace FleetManagementSystem.Services.JobCards
             await _jobCardRepository.UpdateAsync(jobCard);
             return ObjectMapper.Map<JobCardDto>(jobCard);
         }
+
 
         public async Task DeleteAsync(Guid id)
         {

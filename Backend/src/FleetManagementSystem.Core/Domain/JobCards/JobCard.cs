@@ -37,5 +37,6 @@ namespace FleetManagementSystem.Domain.JobCards
         public Guid? AssignedMechanicId { get; set; }
         [ForeignKey("AssignedMechanicId")]
         public virtual Mechanic AssignedMechanic { get; set; }
+        public virtual string AssignedMechanicName { get; set; }
     }
 }

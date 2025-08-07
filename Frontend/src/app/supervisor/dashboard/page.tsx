@@ -4,36 +4,25 @@ import React from "react";
 import { Row, Col, Card, Typography, List, Avatar } from "antd";
 import { FileTextOutlined, ToolOutlined } from "@ant-design/icons";
 import { useStyles } from "./style/supervisorDashboardStyle";
+import { useJobCardState, useJobCardActions } from "@/providers/jobCard-provider";
+import { useMechanicState, useMechanicActions } from "@/providers/mechanic-provider";
 
 const { Title, Text } = Typography;
 
 const SupervisorDashboard: React.FC = () => {
   const { styles } = useStyles();
 
-  const totalJobCards = 12;
-  const totalMechanics = 5;
+  const { jobCards } = useJobCardState();
+  const { mechanics } = useMechanicState();
 
-  // Sample recent job cards data
-  const recentJobCards = [
-    {
-      id: "JC-001",
-      vehicle: "Toyota Hilux",
-      issue: "Engine overheating",
-      date: "2025-07-28",
-    },
-    {
-      id: "JC-002",
-      vehicle: "Ford Ranger",
-      issue: "Brake replacement",
-      date: "2025-07-27",
-    },
-    {
-      id: "JC-003",
-      vehicle: "Isuzu D-Max",
-      issue: "Oil change",
-      date: "2025-07-26",
-    },
-  ];
+  const totalJobCards = jobCards?.length || 0;
+  const totalMechanics = mechanics?.length || 0;
+
+  const recentJobCards = [...(jobCards ?? [])]
+    .sort((a, b) => new Date(b.dateOpened ?? "").getTime() - new Date(a.dateOpened ?? "").getTime())
+    .slice(0, 5);
+
+
 
   return (
     <div>
@@ -66,7 +55,6 @@ const SupervisorDashboard: React.FC = () => {
       <Card
         title="Recent Job Cards"
         style={{ marginTop: 32, background: "white" }}
-        bordered={false}
       >
         <List
           itemLayout="horizontal"
@@ -80,12 +68,20 @@ const SupervisorDashboard: React.FC = () => {
                     icon={<FileTextOutlined />}
                   />
                 }
-                title={`${item.id} - ${item.vehicle}`}
-                description={`Issue: ${item.issue} | Date: ${item.date}`}
+                title={`${item.jobCardNumber ?? "No JobCard Number"}`}
+                description={`Issue: ${item.notes ?? "No issue"} | Date: ${item.dateOpened
+                    ? new Date(item.dateOpened).toLocaleDateString("en-ZA", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                    : "Unknown Date"
+                  } | Assigined Mechanic: ${item.assignedMechanicName ?? "Unassigned"}`}
               />
             </List.Item>
           )}
         />
+
       </Card>
     </div>
   );

@@ -44,6 +44,7 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = () => {
+    sessionStorage.clear();
     router.push("/login");
   };
 

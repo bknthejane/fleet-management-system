@@ -5,8 +5,10 @@ import { Table, Typography, Avatar, message, Modal, Space, Button, Card } from "
 import { UserOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useStyles } from "./style/mechanicStyle";
+import { IJobCard } from "@/providers/jobCard-provider/context";
 import { IMechanic } from "@/providers/mechanic-provider/context";
 import { useMechanicState, useMechanicActions } from "@/providers/mechanic-provider";
+import { useJobCardState, useJobCardActions } from "@/providers/jobCard-provider";
 import MechanicModal from "@/components/MechanicModal";
 
 
@@ -16,7 +18,8 @@ const MechanicsPage: React.FC = () => {
   const { styles } = useStyles();
 
   const { mechanics } = useMechanicState();
-  // const { jobCards } = useJobCardState();
+  const { jobCards } = useJobCardState();
+  const { getJobCardList, createJobCard, updateJobCard, deleteJobCard } = useJobCardActions();
   const { getMechanicList, createMechanic, updateMechanic, deleteMechanic } = useMechanicActions();
 
   const [saving, setSaving] = useState(false);
@@ -45,7 +48,7 @@ const MechanicsPage: React.FC = () => {
 
     if (storedMunicipalityId && storedSupervisorId) {
       getMechanicList();
-      // getJobCardList();
+      getJobCardList();
     }
   }, []);
 
@@ -123,76 +126,76 @@ const MechanicsPage: React.FC = () => {
     setViewModalVisible(true);
   }
 
-  // const handleAssignJobCard = async () => {
-  //   if (!selectedMechanic || !selectedJobCardId) return;
+  const handleAssignJobCard = async () => {
+    if (!selectedMechanic || !selectedJobCardId) return;
 
-  //   setAssigning(true);
-  //   try {
-  //     const selectedJobCard = jobCards?.find((j) => j.id === selectedJobCardId);
-  //     if (!selectedJobCard) {
-  //       message.error("Selected job card not found.");
-  //       return;
-  //     }
+    setAssigning(true);
+    try {
+      const selectedJobCard = jobCards?.find((j) => j.id === selectedJobCardId);
+      if (!selectedJobCard) {
+        message.error("Selected job card not found.");
+        return;
+      }
 
-  //     await updateMechanic({
-  //       ...selectedMechanic,
-  //       assignedJobCardId: selectedJobCard.id,
-  //       assignedJobCardNumber: selectedJobCard.jobCardNumber,
-  //     });
+      await updateMechanic({
+        ...selectedMechanic,
+        assignedJobCardId: selectedJobCard.id,
+        assignedJobCardNumber: selectedJobCard.jobCardNumber,
+      });
 
-  //     await updateJobCard({
-  //       ...selectedMechanic,
-  //       assignedMechanicId: selectedMechanic.id,
-  //     });
+      await updateJobCard({
+        ...selectedMechanic,
+        assignedMechanicId: selectedMechanic.id,
+      });
 
-  //     message.success("Job Card assigned successfully!");
-  //     await Promise.all([getMechanicList(), getJobCardList()]);
-  //     setAssignModalVisible(false);
-  //     setSelectedJobCardId(null);
-  //     setViewModalVisible(false);
-  //   } catch (error) {
-  //     console.error("Error assigning job card:", error);
-  //     message.error("Failed to assign job card");
-  //   } finally {
-  //     setAssigning(false);
-  //   }
-  // };
+      message.success("Job Card assigned successfully!");
+      await Promise.all([getMechanicList(), getJobCardList()]);
+      setAssignModalVisible(false);
+      setSelectedJobCardId(null);
+      setViewModalVisible(false);
+    } catch (error) {
+      console.error("Error assigning job card:", error);
+      message.error("Failed to assign job card");
+    } finally {
+      setAssigning(false);
+    }
+  };
 
-  // const handleUnassignJobCard = async () => {
-  //   if (!selectedMechanic || !selectedJobCardId.assignedMechanicId) return;
+  const handleUnassignJobCard = async () => {
+    if (!selectedMechanic) return;
 
-  //   setUnassigning(true);
-  //   try {
-  //     const jobCardToUnassign = jobCards?.find(
-  //       (j) => j.id === selectedMechanic.assignedJobCardId
-  //     );
+    setUnassigning(true);
+    try {
+      const jobCardToUnassign = jobCards?.find(
+        (j) => j.id === selectedMechanic.assignedJobCardId
+      );
 
-  //     await updateMechanic({
-  //       ...selectedMechanic,
-  //       assignedJobCardId: undefined,
-  //     });
+      await updateMechanic({
+        ...selectedMechanic,
+        assignedJobCardId: undefined,
+      });
 
-  //     if (jobCardToUnassign) {
-  //       await updateJobCard({
-  //         ...jobCardToUnassign,
-  //         assignedMechanicId: undefined,
-  //       });
-  //     }
+      if (jobCardToUnassign) {
+        await updateJobCard({
+          ...jobCardToUnassign,
+          assignedMechanicId: undefined,
+        });
+      }
 
-  //     message.success("Job Card unassigned successfully!");
-  //     await Promise.all([getMechanicList(), getJobCardList()]);
-  //     setViewModalVisible(false);
-  //   } catch (error) {
-  //     console.error("Error unassigning job card:", error);
-  //     message.error("Failed to unassign job card");
-  //   } finally {
-  //     setUnassigning(false);
-  //   }
-  // };
+      message.success("Job Card unassigned successfully!");
+      await Promise.all([getMechanicList(), getJobCardList()]);
+      setViewModalVisible(false);
+    } catch (error) {
+      console.error("Error unassigning job card:", error);
+      message.error("Failed to unassign job card");
+    } finally {
+      setUnassigning(false);
+    }
+  };
 
-  const filteredMechanics = mechanics?.filter((mec) => mec.municipalityId?.toString() === municipalityId) || [];
+  const filteredMechanics = mechanics?.filter((mec) => mec.supervisorId?.toString() === supervisorId) || [];
 
-  // const unassignedJobCards: IJobCard[] = jobCards?.filter((jc) => !jc.assignedMechanicId && jc.municipalityId?.toString() === municipalityId) || [];
+  const unassignedJobCards: IJobCard[] = jobCards?.filter((jc) => !jc.assignedMechanicId && jc.supervisorId?.toString() === supervisorId) || [];
 
   const columns: ColumnsType<IMechanic> = [
     {
@@ -210,7 +213,7 @@ const MechanicsPage: React.FC = () => {
     { title: "Email", key: "email", render: (_, record) => record.email || "-" },
     { title: "Department", key: "department", render: (_, record) => record.department || "-" },
     { title: "Municipality Name", key: "municipalityName", render: (_, record) => record.municipalityName || "-" },
-    { title: "Assigned Job Card", key: "assignedJobCardId", render: (_, record) => record.assignedJobCardId || "-" },
+    { title: "Assigned Job Card", key: "assignedJobCardNumber", render: (_, record) => record.assignedJobCardNumber || "-" },
     {
       title: "Actions",
       key: "actions",
@@ -266,12 +269,12 @@ const MechanicsPage: React.FC = () => {
           }
         }}
         isViewMode={viewModalVisible}
-        // jobCards={unassignedJobCards}
+        jobCards={unassignedJobCards}
         selectedJobCardId={selectedJobCardId}
         setSelectedJobCardId={setSelectedJobCardId}
-        // onAssign={handleAssignJobCard}
+        onAssign={handleAssignJobCard}
         assigning={assigning}
-        // onUnassign={handleUnassignJobCard}
+        onUnassign={handleUnassignJobCard}
         unassigning={unassigning}
         showAssignModal={assignModalVisible}
         setShowAssignModal={setAssignModalVisible}
