@@ -7,6 +7,7 @@ using Abp.Domain.Repositories;
 using Abp.UI;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
+using FleetManagementSystem.Domain.Drivers;
 using FleetManagementSystem.Domain.JobCards;
 using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Supervisors;
@@ -44,8 +45,17 @@ namespace FleetManagementSystem.Services.Mechanics
                 .GetAllIncluding(m => m.AssignedJobCard)
                 .ToListAsync();
 
-            return ObjectMapper.Map<List<MechanicDto>>(mechanics);
+            var dtos = ObjectMapper.Map<List<MechanicDto>>(mechanics);
+
+            foreach (var dto in dtos)
+            {
+                var mechanic = mechanics.First(m => m.Id == dto.Id);
+                dto.AssignedJobCardNumber = mechanic.AssignedJobCard?.JobCardNumber;
+            }
+
+            return dtos;
         }
+
 
         public async Task<MechanicDto> GetAsync(Guid id)
         {
@@ -65,6 +75,20 @@ namespace FleetManagementSystem.Services.Mechanics
 
         public async Task<MechanicDto> CreateAsync(CreateMechanicDto input)
         {
+            var mechanic = ObjectMapper.Map<Mechanic>(input);
+            mechanic.Id = Guid.NewGuid();
+
+
+            var supervisor = await _supervisorRepository.GetAsync(input.SupervisorId);
+            if (supervisor == null)
+                throw new UserFriendlyException("Supervisor not found");
+
+            mechanic.Department = supervisor.Department;
+
+
+            await _mechanicRepository.InsertAsync(mechanic);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
             var user = new User
             {
                 UserName = input.Username,
@@ -74,7 +98,11 @@ namespace FleetManagementSystem.Services.Mechanics
                 IsActive = true,
                 MunicipalityId = input.MunicipalityId,
                 MunicipalityName = input.MunicipalityName,
+                MechanicId = mechanic.Id,
+                MechanicName = mechanic.Name,
             };
+            
+
 
             var result = await _userManager.CreateAsync(user, input.Password);
             if (!result.Succeeded)
@@ -92,19 +120,14 @@ namespace FleetManagementSystem.Services.Mechanics
             }
 
             await _userManager.AddToRoleAsync(user, roleName);
-
-            var supervisor = await _supervisorRepository.GetAsync(input.SupervisorId);
-            if (supervisor == null)
-                throw new UserFriendlyException("Supervisor not found");
-
-            var mechanic = ObjectMapper.Map<Mechanic>(input);
-            mechanic.Id = Guid.NewGuid();
+            await CurrentUnitOfWork.SaveChangesAsync();
             mechanic.UserId = user.Id;
-            mechanic.Department = supervisor.Department;
 
-            await _mechanicRepository.InsertAsync(mechanic);
+            await _mechanicRepository.UpdateAsync(mechanic);
+            await CurrentUnitOfWork.SaveChangesAsync();
 
-            return ObjectMapper.Map<MechanicDto>(mechanic);
+            //return ObjectMapper.Map<MechanicDto>(mechanic);
+            return await GetAsync(mechanic.Id);
         }
 
         public async Task<MechanicDto> UpdateAsync(UpdateMechanicDto input)
@@ -134,7 +157,6 @@ namespace FleetManagementSystem.Services.Mechanics
             if (!userUpdateResult.Succeeded)
                 throw new UserFriendlyException("Failed to update user: " + string.Join(", ", userUpdateResult.Errors.Select(e => e.Description)));
 
-            // 🛠 Handle Job Card assignment
             if (input.AssignedJobCardId.HasValue)
             {
                 var jobCard = await _jobCardRepository.FirstOrDefaultAsync(input.AssignedJobCardId.Value);
@@ -145,11 +167,14 @@ namespace FleetManagementSystem.Services.Mechanics
                 await _jobCardRepository.UpdateAsync(jobCard);
 
                 mechanic.AssignedJobCardId = jobCard.Id;
+                mechanic.AssignedJobCardNumber = jobCard.JobCardNumber;
             }
             else
             {
                 mechanic.AssignedJobCardId = null;
+                mechanic.AssignedJobCardNumber = null;
             }
+
 
             await _mechanicRepository.UpdateAsync(mechanic);
             await CurrentUnitOfWork.SaveChangesAsync();

@@ -10,7 +10,6 @@ namespace FleetManagementSystem.Services.Mechanics.Dto
         public Guid SupervisorId { get; set; }
         public Guid MunicipalityId { get; set; }
         public string MunicipalityName { get; set; }
-
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Username { get; set; }

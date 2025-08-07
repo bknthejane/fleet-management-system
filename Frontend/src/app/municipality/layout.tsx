@@ -64,7 +64,7 @@ const MunicipalityLayout: React.FC<MunicipalityLayoutProps> = ({ children }) => 
   ];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    sessionStorage.clear();
     router.push("/login");
   };
 

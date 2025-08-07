@@ -19,6 +19,7 @@ using FleetManagementSystem.Authorization.Accounts;
 using FleetManagementSystem.Authorization.Roles;
 using FleetManagementSystem.Authorization.Users;
 using FleetManagementSystem.Domain.Drivers;
+using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Roles.Dto;
 using FleetManagementSystem.Users.Dto;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +37,7 @@ namespace FleetManagementSystem.Users
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
         private readonly IRepository<Driver, Guid> _driverRepository;
+        private readonly IRepository<Mechanic, Guid> _mechanicRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -45,7 +47,8 @@ namespace FleetManagementSystem.Users
             IPasswordHasher<User> passwordHasher,
             IAbpSession abpSession,
             LogInManager logInManager,
-            IRepository<Driver, Guid> driverRepository)
+            IRepository<Driver, Guid> driverRepository,
+            IRepository<Mechanic, Guid> mechanicRepository)
             : base(repository)
         {
             _userManager = userManager;
@@ -55,6 +58,7 @@ namespace FleetManagementSystem.Users
             _abpSession = abpSession;
             _logInManager = logInManager;
             _driverRepository = driverRepository;
+            _mechanicRepository = mechanicRepository;
         }
 
         public override async Task<UserDto> CreateAsync(CreateUserDto input)
@@ -157,12 +161,18 @@ namespace FleetManagementSystem.Users
             var userDto = base.MapToEntityDto(user);
             userDto.RoleNames = roles.ToArray();
 
-            // 👇 Add driver info
             var driver = _driverRepository.GetAll().FirstOrDefault(d => d.UserId == user.Id);
             if (driver != null)
             {
                 userDto.DriverId = driver.Id;
                 userDto.AssignedVehicleId = driver.AssignedVehicleId;
+            }
+
+            var mechanic = _mechanicRepository.GetAll().FirstOrDefault(m => m.UserId == user.Id);
+            if (mechanic != null)
+            {
+                userDto.MechanicId = mechanic.Id;
+                userDto.MechanicName = mechanic.Name;
             }
 
             return userDto;

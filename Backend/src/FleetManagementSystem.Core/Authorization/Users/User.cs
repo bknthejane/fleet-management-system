@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Abp.Authorization.Users;
 using Abp.Extensions;
 using FleetManagementSystem.Domain.Drivers;
+using FleetManagementSystem.Domain.Mechanics;
 using FleetManagementSystem.Domain.Municipalities;
 using FleetManagementSystem.Domain.Supervisors;
 
@@ -23,6 +24,10 @@ namespace FleetManagementSystem.Authorization.Users
         public virtual Driver Driver { get; set; }
 
         public Guid? AssignedVehicleId { get; set; }
+
+        public Guid? MechanicId { get; set; }
+        public string MechanicName { get; set; }
+        public virtual Mechanic Mechanic { get; set; }
 
 
         public const string DefaultPassword = "123qwe";

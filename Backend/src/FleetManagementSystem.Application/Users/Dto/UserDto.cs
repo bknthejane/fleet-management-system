@@ -47,5 +47,7 @@ namespace FleetManagementSystem.Users.Dto
         public string DriverName { get; set; }
 
         public Guid? AssignedVehicleId { get; set; }
+        public Guid? MechanicId { get; set; }
+        public string MechanicName { get; set; }
     }
 }

@@ -51,7 +51,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    sessionStorage.clear();
     router.push("/login");
   };
 

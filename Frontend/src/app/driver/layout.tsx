@@ -44,6 +44,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = () => {
+    sessionStorage.clear();
     router.push("/login");
   };
 

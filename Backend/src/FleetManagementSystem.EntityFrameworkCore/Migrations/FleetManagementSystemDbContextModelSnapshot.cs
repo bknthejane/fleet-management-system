@@ -1528,6 +1528,12 @@ namespace FleetManagementSystem.Migrations
                     b.Property<DateTime?>("LockoutEndDateUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("MechanicId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MechanicName")
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("MunicipalityId")
                         .HasColumnType("uuid");
 
@@ -1736,6 +1742,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid?>("AssignedMechanicId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AssignedMechanicName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -1811,6 +1820,9 @@ namespace FleetManagementSystem.Migrations
                     b.Property<Guid?>("AssignedJobCardId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AssignedJobCardNumber")
+                        .HasColumnType("text");
+
                     b.Property<string>("ContactNumber")
                         .HasColumnType("text");
 
@@ -1867,7 +1879,8 @@ namespace FleetManagementSystem.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Mechanics");
                 });
@@ -2442,8 +2455,8 @@ namespace FleetManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("FleetManagementSystem.Authorization.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .WithOne("Mechanic")
+                        .HasForeignKey("FleetManagementSystem.Domain.Mechanics.Mechanic", "UserId");
 
                     b.Navigation("AssignedJobCard");
 
@@ -2578,6 +2591,8 @@ namespace FleetManagementSystem.Migrations
                     b.Navigation("Driver");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("Mechanic");
 
                     b.Navigation("Permissions");
 

@@ -14,5 +14,6 @@ namespace FleetManagementSystem.Services.JobCards.Dto
         public DateTime DateOpened { get; set; }
         public DateTime? DateCompleted { get; set; }
         public Guid? AssignedMechanicId { get; set; }
+        public string AssignedMechanicName { get; set; }
     }
 }
