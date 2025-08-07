@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import useStyles from "./style/loginStyles";
 import Typography from "antd/es/typography";
 import { useRouter } from "next/navigation";
-import { Button, Form, Input, Spin } from "antd";
-import message from "antd/es/message";
+import { Button, Form, Input} from "antd";
 import Image from "next/image";
 import {
   EyeInvisibleOutlined,
@@ -22,7 +21,7 @@ type FieldType = {
   password?: string;
 };
 
-const Login = () => {
+const Login: React.FC = () => {
   const { styles } = useStyles();
   const { Title } = Typography;
   const router = useRouter();
@@ -75,17 +74,11 @@ const Login = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <Spin size="large" />
-      </div>
-    );
-  }
-
   return (
-    <div className={styles.pageContainer}>
+    <div className={styles.background}>
+      <div className={styles.overlay} />
       <div className={styles.loginContainer}>
+
         <div className={styles.logoContainer}>
           <Image
             src="/Logo.png"
@@ -139,10 +132,10 @@ const Login = () => {
           <Form.Item className={styles.formItem}>
             <Button
               htmlType="submit"
-              type="primary"
               size="large"
               className={styles.button}
               block
+              loading={loading}
             >
               Log in
             </Button>

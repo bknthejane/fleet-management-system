@@ -3,7 +3,7 @@ import { createStyles, css, keyframes } from "antd-style";
 const fadeIn = keyframes`
   from {
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(2rem);
   }
   to {
     opacity: 1;
@@ -11,44 +11,42 @@ const fadeIn = keyframes`
   }
 `;
 
+const gradientShift = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+`;
+
 const useStyles = createStyles({
-  pageContainer: css`
-    height: 100vh;
+  background: css`
+    position: relative;
+    top: 0;
+    left: 0;
     width: 100vw;
-    background-image: linear-gradient(
-        rgba(250, 250, 250, 0.9),
-        rgba(240, 240, 240, 0.9)
-      ),
-      url("/Media.jpg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    height: 100vh;
+    background: url('/Media.jpg') no-repeat center center / cover;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 20px;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    justify-content: center;
+    padding: 1.5rem;
+    overflow: hidden;
   `,
 
-  loginContainer: css`
-    background: rgba(255, 255, 255, 0.97);
-    border-radius: 20px;
-    max-width: 400px;
+  overlay: css`
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 42px 36px;
-    box-shadow: 0 10px 40px rgba(60, 64, 67, 0.15);
-    color: #1f2937;
-    animation: ${fadeIn} 0.6s ease forwards;
-    transition: box-shadow 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 15px 50px rgba(60, 64, 67, 0.25);
-    }
-
-    @media (max-width: 480px) {
-      padding: 30px 24px;
-      max-width: 320px;
-    }
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1; /* behind loginContainer */
   `,
 
   logoContainer: css`
@@ -57,24 +55,24 @@ const useStyles = createStyles({
   `,
 
   logoImage: css`
-    max-height: 120px;
-    margin-bottom: 18px;
-    user-select: none;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 50%;
   `,
 
   welcomeTitle: css`
     font-size: 30px;
     font-weight: 600;
     margin-bottom: 10px;
-    color: #334155;
+    color: #1f2937;
   `,
 
   subHeading: css`
     font-size: 16px;
     font-weight: 400;
-    color: #64748b;
+    color: #f1f1f1;
     margin-bottom: 36px;
-    line-height: 1.4;
+    line-height: 1.5;
   `,
 
   formItem: css`
@@ -82,12 +80,10 @@ const useStyles = createStyles({
 
     .ant-input,
     .ant-input-password {
-      background-color: #f9fafb !important;
-      color: #334155;
+      background-color: #f3f4f6 !important;
+      color: #1f2937;
       border: 1.8px solid #cbd5e1;
       border-radius: 12px;
-      box-shadow: none;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
       &:hover {
         border-color: #94a3b8 !important;
@@ -95,8 +91,8 @@ const useStyles = createStyles({
 
       &:focus,
       &:focus-visible {
-        border-color: #60a5fa !important;
-        box-shadow: 0 0 10px 2px rgba(96, 165, 250, 0.4);
+        border-color: #7c3aed !important;
+        box-shadow: 0 0 10px 2px rgba(124, 58, 237, 0.4);
         outline: none;
       }
     }
@@ -112,39 +108,57 @@ const useStyles = createStyles({
   `,
 
   button: css`
-    width: 100%;
-    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    padding: 0.8rem 2.5rem;
     border: none;
-    color: white;
-    font-weight: 600;
-    height: 48px;
-    border-radius: 12px;
-    font-size: 17px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.4);
-    transition: background 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #f5f5f5;
+    border-radius: 2rem;
+    background: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #3f3f46);
+    background-size: 300% 300%;
+    animation: ${gradientShift} 6s ease infinite;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 
     &:hover {
-      background: linear-gradient(135deg, #475569 0%, #334155 100%);
       transform: scale(1.05);
-      box-shadow: 0 8px 28px rgba(71, 85, 105, 0.6);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
     }
 
     &:focus {
-      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-      box-shadow: 0 0 10px 3px rgba(71, 92, 119, 0.5);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
     }
   `,
 
-  loadingContainer: css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  `,
+  loginContainer: css`
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2rem;
+    max-width: 400px;
+    width: 100%;
+    padding: 42px 36px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #1f2937;
+    animation: ${fadeIn} 1s ease forwards;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 15px 50px rgba(31, 41, 55, 0.35);
+    }
+
+    @media (max-width: 480px) {
+      padding: 30px 24px;
+      max-width: 320px;
+    }
+`,
 });
 
 export default useStyles;
