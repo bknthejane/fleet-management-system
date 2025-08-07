@@ -32,7 +32,6 @@ interface DriverModalProps {
     onClose: () => void;
     editRecord: IDriver | null;
     onSave: (values: IDriver) => void;
-
     isViewMode?: boolean;
     vehicles?: IVehicle[];
     selectedVehicleId?: string | null;
@@ -44,6 +43,7 @@ interface DriverModalProps {
     showAssignModal?: boolean;
     setShowAssignModal?: (visible: boolean) => void;
     saving?: boolean;
+    onSwitchToEdit: (record: IDriver) => void;
 }
 
 const DriverModal: React.FC<DriverModalProps> = ({
@@ -62,6 +62,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
     showAssignModal = false,
     setShowAssignModal,
     saving = false,
+    onSwitchToEdit,
 }) => {
     const { styles } = useStyles();
     const [form] = Form.useForm<DriverFormValues>();
@@ -106,6 +107,11 @@ const DriverModal: React.FC<DriverModalProps> = ({
         }
     };
 
+    // The modal width is set to a larger value for better use of space
+    const getModalWidth = () => {
+        return isViewMode ? 400 : 900;
+    };
+
     return (
         <>
             <Modal
@@ -121,117 +127,136 @@ const DriverModal: React.FC<DriverModalProps> = ({
                 footer={
                     isViewMode
                         ? [
-                            <Button
-                                key="edit"
-                                onClick={() => {
-                                    onSave(editRecord as IDriver);
-                                }}
-                            >
-                                Edit
-                            </Button>,
-                            editRecord?.assignedVehicleId && (
-                                <Button
-                                    key="unassign"
-                                    danger
-                                    onClick={onUnassign}
-                                    loading={unassigning}
-                                >
-                                    Unassign Vehicle
-                                </Button>
-                            ),
-                            <Button
-                                key="assign"
-                                type="primary"
-                                onClick={() => setShowAssignModal?.(true)}
-                            >
-                                {editRecord?.assignedVehicleId ? "Reassign Vehicle" : "Assign Vehicle"}
-                            </Button>,
-                        ]
+                              <Button
+                                  key="edit"
+                                  onClick={() => onSwitchToEdit(editRecord as IDriver)}
+                              >
+                                  Edit
+                              </Button>,
+                              editRecord?.assignedVehicleId && (
+                                  <Button
+                                      key="unassign"
+                                      danger
+                                      onClick={onUnassign}
+                                      loading={unassigning}
+                                  >
+                                      Unassign Vehicle
+                                  </Button>
+                              ),
+                              <Button
+                                  key="assign"
+                                  type="primary"
+                                  onClick={() => setShowAssignModal?.(true)}
+                              >
+                                  {editRecord?.assignedVehicleId ? "Reassign Vehicle" : "Assign Vehicle"}
+                              </Button>,
+                          ]
                         : [
-                            <Button key="cancel" onClick={onClose} disabled={saving}>
-                                Cancel
-                            </Button>,
-                            <Button
-                                key="submit"
-                                type="primary"
-                                onClick={handleSubmit}
-                                loading={saving}
-                            >
-                                Submit
-                            </Button>,
-                        ]
+                              <Button key="cancel" onClick={onClose} disabled={saving}>
+                                  Cancel
+                              </Button>,
+                              <Button
+                                  key="submit"
+                                  type="primary"
+                                  onClick={handleSubmit}
+                                  loading={saving}
+                              >
+                                  Submit
+                              </Button>,
+                          ]
                 }
-                width={700}
+                width={getModalWidth()}
             >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    className={styles.modalForm}
-                    autoComplete="off"
-                >
-                    <Row gutter={32}>
-                        <Col span={12}>
-                            <Title level={5}>Driver Info</Title>
-                            <Form.Item
-                                name="name"
-                                label="Name"
-                                rules={[{ required: true, message: "Please enter name" }]}
-                            >
-                                <Input disabled={saving || isViewMode} />
-                            </Form.Item>
-                            <Form.Item
-                                name="surname"
-                                label="Surname"
-                                rules={[{ required: true, message: "Please enter surname" }]}
-                            >
-                                <Input disabled={saving || isViewMode} />
-                            </Form.Item>
-
-                            {editRecord?.assignedVehicleFleetNumber && (
-                                <Form.Item label="Assigned Vehicle">
-                                    <Input
-                                        disabled
-                                        value={editRecord.assignedVehicleFleetNumber}
-                                    />
+                {isViewMode ? (
+                    <div>
+                        <p>
+                            <strong>Name:</strong> {editRecord?.name}
+                        </p>
+                        <p>
+                            <strong>Surname:</strong> {editRecord?.surname}
+                        </p>
+                        <p>
+                            <strong>Municipality:</strong> {editRecord?.municipalityName}
+                        </p>
+                        <p>
+                            <strong>Assigned Vehicle:</strong> {editRecord?.assignedVehicleFleetNumber || "None"}
+                        </p>
+                    </div>
+                ) : (
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        className={styles.modalForm}
+                        autoComplete="off"
+                    >
+                        {/* Use Ant Design's Row and Col for a responsive grid layout */}
+                        <Title level={5}>Driver Info</Title>
+                        <Row gutter={16}> {/* Gutter provides space between the columns */}
+                            <Col span={12}>
+                                <Form.Item
+                                    name="name"
+                                    label="Name"
+                                    rules={[{ required: true, message: "Please enter name" }]}
+                                >
+                                    <Input disabled={saving} />
                                 </Form.Item>
-                            )}
-                        </Col>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    name="surname"
+                                    label="Surname"
+                                    rules={[{ required: true, message: "Please enter surname" }]}
+                                >
+                                    <Input disabled={saving} />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                        <Col span={12}>
-                            {!editRecord && (
-                                <>
-                                    <Title level={5}>Account Credentials</Title>
-                                    <Form.Item
-                                        name="userName"
-                                        label="Username"
-                                        rules={[{ required: true, message: "Please enter username" }]}
-                                    >
-                                        <Input disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="email"
-                                        label="Email"
-                                        rules={[
-                                            { required: true, message: "Please enter email" },
-                                            { type: "email", message: "Please enter a valid email" },
-                                        ]}
-                                    >
-                                        <Input disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="password"
-                                        label="Password"
-                                        rules={[{ required: true, message: "Please enter password" }]}
-                                    >
-                                        <Input.Password disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                </>
-                            )}
-                        </Col>
-                    </Row>
-                </Form>
+                        {editRecord?.assignedVehicleFleetNumber && (
+                            <Form.Item label="Assigned Vehicle">
+                                <Input disabled value={editRecord.assignedVehicleFleetNumber} />
+                            </Form.Item>
+                        )}
+
+                        {!editRecord && (
+                            <>
+                                <Title level={5}>Account Credentials</Title>
+                                <Row gutter={16}>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            name="userName"
+                                            label="Username"
+                                            rules={[{ required: true, message: "Please enter username" }]}
+                                        >
+                                            <Input disabled={saving} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            name="email"
+                                            label="Email"
+                                            rules={[
+                                                { required: true, message: "Please enter email" },
+                                                { type: "email", message: "Please enter a valid email" },
+                                            ]}
+                                        >
+                                            <Input disabled={saving} />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                                <Form.Item
+                                    name="password"
+                                    label="Password"
+                                    rules={[{ required: true, message: "Please enter password" }]}
+                                >
+                                    <Input.Password disabled={saving} />
+                                </Form.Item>
+                            </>
+                        )}
+                    </Form>
+                )}
             </Modal>
-
+            {/* The assign vehicle modal remains unchanged */}
             <Modal
                 title={`Assign Vehicle to ${editRecord?.name || ""} ${editRecord?.surname || ""}`}
                 open={showAssignModal}
@@ -250,6 +275,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                         Assign
                     </Button>,
                 ]}
+                width={400}
             >
                 {vehicles.length === 0 ? (
                     <p>No unassigned vehicles available</p>

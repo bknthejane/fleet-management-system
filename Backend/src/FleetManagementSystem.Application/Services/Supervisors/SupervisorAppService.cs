@@ -64,7 +64,18 @@ namespace FleetManagementSystem.Services.Supervisors
             if (!result.Succeeded)
                 throw new UserFriendlyException("User creation failed: " + string.Join(", ", result.Errors));
 
-            await _userManager.AddToRoleAsync(user, "Supervisor");
+            var roleName = "Supervisor";
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                await _roleManager.CreateAsync(new Role
+                {
+                    Name = roleName,
+                    DisplayName = "Supervisor",
+                    IsStatic = true,
+                });
+            }
+
+            await _userManager.AddToRoleAsync(user, roleName);
             await CurrentUnitOfWork.SaveChangesAsync();
 
             supervisor.UserId = user.Id;
