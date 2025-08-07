@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Card, Typography, Modal, Space, Tag, message, Input, Form } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
-  PlusOutlined,
   EditOutlined,
   LockOutlined,
 } from "@ant-design/icons";
 import { useUserState, useUserActions } from "@/providers/user-provider";
 import { IUser } from "@/providers/user-provider/context";
 import { useStyles } from "./style/usersStyles";
+import useApp from "antd/es/app/useApp";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -26,6 +26,7 @@ const UsersPage: React.FC = () => {
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const app = useApp();
 
   useEffect(() => {
     getUserList();
@@ -75,23 +76,23 @@ const UsersPage: React.FC = () => {
         };
 
         if (!payload.adminPassword) {
-          message.error("Password change cancelled. Admin password is required.");
+          app.message.error("Password change cancelled. Admin password is required.");
           return;
         }
 
         await changePassword(payload);
-        message.success(`Password updated for ${currentUser.userName}`);
+        app.message.success(`Password updated for ${currentUser.userName}`);
       }
       else {
         await updateUser({ ...currentUser, ...values });
-        message.success(`User ${values.userName} updated successfully`);
+        app.message.success(`User ${values.userName} updated successfully`);
       }
 
       getUserList();
       setIsModalOpen(false);
     } catch (err) {
       console.error("Error:", err);
-      message.error("An error occurred. Please try again.");
+      app.message.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
