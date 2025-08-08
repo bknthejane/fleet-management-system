@@ -101,11 +101,11 @@ const UsersPage: React.FC = () => {
                 const payload = {
                     userId: currentUser.id,
                     newPassword: values.password,
-                    adminPassword: prompt("Please enter your supervisor password to confirm:")
+                    adminPassword: prompt("Please enter your admin password to confirm:")
                 };
 
                 if (!payload.adminPassword) {
-                    app.message.error("Password change cancelled. Supervisor password is required.");
+                    app.message.error("Password change cancelled. Admin password is required.");
                     return;
                 }
 

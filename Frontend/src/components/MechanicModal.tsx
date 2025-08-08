@@ -11,10 +11,12 @@ import {
     Typography,
     Select,
     message,
+    Space
 } from "antd";
 import { IMechanic } from "@/providers/mechanic-provider/context";
 import { IJobCard } from "@/providers/jobCard-provider/context";
 import { useStyles } from "@/app/admin/municipalities/style/municipalitiesStyles";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -44,6 +46,7 @@ interface MechanicModalProps {
     showAssignModal?: boolean;
     setShowAssignModal?: (visible: boolean) => void;
     saving?: boolean;
+    onSwitchToEdit: (record: IMechanic) => void;
 }
 
 const MechanicModal: React.FC<MechanicModalProps> = ({
@@ -62,6 +65,7 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
     showAssignModal = false,
     setShowAssignModal,
     saving = false,
+    onSwitchToEdit,
 }) => {
     const { styles } = useStyles();
     const [form] = Form.useForm<MechanicFormValues>();
@@ -122,31 +126,32 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
                 footer={
                     isViewMode
                         ? [
-                            <Button
-                                key="edit"
-                                onClick={() => {
-                                    onSave(editRecord as IMechanic);
-                                }}
-                            >
-                                Edit
-                            </Button>,
-                            editRecord?.assignedJobCardId && (
+                            <Space key="view-actions">
                                 <Button
-                                    key="unassign"
-                                    danger
-                                    onClick={onUnassign}
-                                    loading={unassigning}
+                                    key="edit"
+                                    icon={<EditOutlined />}
+                                    onClick={() => onSwitchToEdit(editRecord as IMechanic)}
                                 >
-                                    Unassign JobCard
+                                    Edit
                                 </Button>
-                            ),
-                            <Button
-                                key="assign"
-                                type="primary"
-                                onClick={() => setShowAssignModal?.(true)}
-                            >
-                                {editRecord?.assignedJobCardId ? "Reassign Job Card" : "Assign Job Card"}
-                            </Button>,
+                                {editRecord?.assignedJobCardId && (
+                                    <Button
+                                        key="unassign"
+                                        danger
+                                        onClick={onUnassign}
+                                        loading={unassigning}
+                                    >
+                                        Unassign Job Card
+                                    </Button>
+                                )}
+                                <Button
+                                    key="assign"
+                                    type="primary"
+                                    onClick={() => setShowAssignModal?.(true)}
+                                >
+                                    {editRecord?.assignedJobCardId ? "Reassign Job Card" : "Assign Job Card"}
+                                </Button>
+                            </Space>
                         ]
                         : [
                             <Button key="cancel" onClick={onClose} disabled={saving}>
@@ -171,7 +176,7 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
                     autoComplete="off"
                 >
                     <Row gutter={32}>
-                        <Col span={12}>
+                        <Col span={24}>
                             <Title level={5}>Driver Info</Title>
                             <Form.Item
                                 name="name"
@@ -197,38 +202,35 @@ const MechanicModal: React.FC<MechanicModalProps> = ({
                                 </Form.Item>
                             )}
                         </Col>
-
-                        <Col span={12}>
-                            {!editRecord && (
-                                <>
-                                    <Title level={5}>Account Credentials</Title>
-                                    <Form.Item
-                                        name="userName"
-                                        label="Username"
-                                        rules={[{ required: true, message: "Please enter username" }]}
-                                    >
-                                        <Input disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="email"
-                                        label="Email"
-                                        rules={[
-                                            { required: true, message: "Please enter email" },
-                                            { type: "email", message: "Please enter a valid email" },
-                                        ]}
-                                    >
-                                        <Input disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="password"
-                                        label="Password"
-                                        rules={[{ required: true, message: "Please enter password" }]}
-                                    >
-                                        <Input.Password disabled={saving || isViewMode} />
-                                    </Form.Item>
-                                </>
-                            )}
-                        </Col>
+                        {!editRecord && (
+                            <Col span={24}>
+                                <Title level={5}>Account Credentials</Title>
+                                <Form.Item
+                                    name="userName"
+                                    label="Username"
+                                    rules={[{ required: true, message: "Please enter username" }]}
+                                >
+                                    <Input disabled={saving || isViewMode} />
+                                </Form.Item>
+                                <Form.Item
+                                    name="email"
+                                    label="Email"
+                                    rules={[
+                                        { required: true, message: "Please enter email" },
+                                        { type: "email", message: "Please enter a valid email" },
+                                    ]}
+                                >
+                                    <Input disabled={saving || isViewMode} />
+                                </Form.Item>
+                                <Form.Item
+                                    name="password"
+                                    label="Password"
+                                    rules={[{ required: true, message: "Please enter password" }]}
+                                >
+                                    <Input.Password disabled={saving || isViewMode} />
+                                </Form.Item>
+                            </Col>
+                        )}
                     </Row>
                 </Form>
             </Modal>

@@ -9,6 +9,7 @@ export interface IUser {
   roleNames?: string[];
   municipalityId?: string;
   municipalityName?: string;
+  supervisorId?: string;
   userId?: string;
   password?: string;
 }
