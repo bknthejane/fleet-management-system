@@ -7,6 +7,7 @@ import { useStyles } from "./style/driverIncidentStyle";
 import { IIncident } from "@/providers/incident-provider/context";
 import { useIncidentActions, useIncidentState } from "@/providers/incident-provider";
 import IncidentModal from "@/components/IncidentModal";
+import useApp from "antd/es/app/useApp";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -27,6 +28,8 @@ const DriverIncidentsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   const [searchText, setSearchText] = useState("");
+  const app = useApp();
+  
 
   useEffect(() => {
     const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
@@ -74,17 +77,17 @@ const DriverIncidentsPage: React.FC = () => {
 
       if (editRecord) {
         await updateIncident(incident);
-        message.success(`Updated Incident`);
+        app.message.success(`Updated Incident`);
       } else {
         await createIncident(incident);
-        message.success(`Created Incident`);
+        app.message.success(`Created Incident`);
       }
 
       await getIncidentList();
       closeModal();
     } catch (error) {
       console.error("Error saving incident:", error);
-      message.error("Failed to save incident");
+      app.message.error("Failed to save incident");
     } finally {
       setSaving(false);
     }

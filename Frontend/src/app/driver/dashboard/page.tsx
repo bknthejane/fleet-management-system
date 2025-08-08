@@ -15,6 +15,8 @@ import { useStyles } from "./style/driverDashboardStyle";
 import { IIncident } from "@/providers/incident-provider/context";
 import { useIncidentState, useIncidentActions } from "@/providers/incident-provider";
 import IncidentModal from "@/components/IncidentModal";
+import useApp from "antd/es/app/useApp";
+
 
 const { Title, Text } = Typography;
 
@@ -36,6 +38,7 @@ const DriverDashboard: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const app = useApp();
 
   useEffect(() => {
     setMunicipalityId(sessionStorage.getItem("municipalityId") || "");
@@ -95,17 +98,17 @@ const DriverDashboard: React.FC = () => {
 
       if (editRecord) {
         await updateIncident(incident);
-        message.success(`Updated Incident`);
+        app.message.success(`Updated Incident`);
       } else {
         await createIncident(incident);
-        message.success(`Created Incident`);
+        app.message.success(`Created Incident`);
       }
 
       await getIncidentList();
       closeModal();
     } catch (error) {
       console.error("Error saving incident:", error);
-      message.error("Failed to save incident");
+      app.message.error("Failed to save incident");
     } finally {
       setSaving(false);
     }
@@ -122,11 +125,11 @@ const DriverDashboard: React.FC = () => {
         setDeleting(true);
         try {
           await deleteIncident(id);
-          message.success("Incident deleted successfully");
+          app.message.success("Incident deleted successfully");
           await getIncidentList();
         } catch (error) {
           console.error("Delete error:", error);
-          message.error("Failed to delete incident");
+          app.message.error("Failed to delete incident");
         } finally {
           setDeleting(false);
         }

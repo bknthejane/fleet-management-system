@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useStyles } from "./style/mechanicStyle";
+import withAuth from "@/hoc/withAuth";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -209,4 +210,4 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
   );
 };
 
-export default MechanicLayout;
+export default withAuth(MechanicLayout, {allowedRoles:["Mechanic"]});

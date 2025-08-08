@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { useStyles } from "./style/supervisorStyle";
 import { useRouter, usePathname } from "next/navigation";
+import withAuth from "@/hoc/withAuth";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -216,4 +217,4 @@ const SupervisorLayout: React.FC<SupervisorLayoutProps> = ({ children }) => {
     );
 };
 
-export default SupervisorLayout;
+export default withAuth(SupervisorLayout, {allowedRoles:["Supervisor"]});

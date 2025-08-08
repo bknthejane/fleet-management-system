@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { useStyles } from "./style/adminStyles";
 import { useRouter, usePathname } from "next/navigation";
+import withAuth from "@/hoc/withAuth";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -30,16 +31,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     role: string;
   } | null>(null);
 
-  // Hook to get the current pathname
   const pathname = usePathname();
   const router = useRouter();
 
-  // State to manage the selected menu key
   const [selectedKey, setSelectedKey] = useState("dashboard");
 
-  // UseEffect hook to retrieve user data from sessionStorage and set the active menu key
   useEffect(() => {
-    // Retrieve user data
     if (typeof window !== "undefined" && window.sessionStorage) {
       const storedUsername = sessionStorage.getItem("loggedInUser");
       const storedRole = sessionStorage.getItem("role");
@@ -52,7 +49,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       }
     }
 
-    // Set selected key based on the current pathname
     if (pathname) {
       const keyFromPath = pathname.split("/").pop();
       if (keyFromPath) {
@@ -221,4 +217,4 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   );
 };
 
-export default AdminLayout;
+export default withAuth(AdminLayout, {allowedRoles:["Admin"]});
