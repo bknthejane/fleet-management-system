@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Layout, Menu, Avatar, Button, Typography } from "antd";
 import {
@@ -10,7 +10,7 @@ import {
   MenuUnfoldOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useStyles } from "./style/driverStyle";
 
 const { Header, Sider, Content } = Layout;
@@ -23,10 +23,37 @@ interface DriverLayoutProps {
 const DriverLayout: React.FC<DriverLayoutProps> = ({ children }) => {
   const { styles } = useStyles();
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [userData, setUserData] = useState<{
+    name: string;
+    role: string;
+  } | null>(null);
+
+  const pathname = usePathname();
   const router = useRouter();
 
-  const driverName = "John Driver";
-  const firstLetter = driverName.charAt(0).toUpperCase();
+  const [selectedKey, setSelectedKey] = useState("dashboard");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      const storedUsername = sessionStorage.getItem("loggedInUser");
+      const storedRole = sessionStorage.getItem("role");
+
+      if (storedUsername && storedRole) {
+        setUserData({
+          name: storedUsername,
+          role: storedRole,
+        });
+      }
+    }
+
+    if (pathname) {
+      const keyFromPath = pathname.split("/").pop();
+      if (keyFromPath) {
+        setSelectedKey(keyFromPath);
+      }
+    }
+  }, [pathname]);
 
   const menuItems = [
     {
@@ -50,34 +77,86 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children }) => {
 
   return (
     <Layout className={styles.layout}>
+      {isMobile && !collapsed && (
+        <div
+          onClick={() => setCollapsed(true)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            zIndex: 1000,
+          }}
+        />
+      )}
+
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
+        collapsedWidth={0}
         className={styles.sidebar}
         width={280}
-        collapsedWidth={80}
+        breakpoint="md"
+        onBreakpoint={(broken) => {
+          setCollapsed(broken);
+          setIsMobile(broken);
+        }}
+        onCollapse={(collapsed) => setCollapsed(collapsed)}
+        style={{
+          zIndex: 1100,
+          position: isMobile ? "fixed" : "relative",
+          height: "100vh",
+          transition: "all 0.3s ease-in-out",
+        }}
       >
-        <div className={styles.sidebarHeader}>
-          <div style={{ width: 80, height: 80, margin: "0 auto 16px auto" }}>
+        <div className={styles.sidebarHeader} style={{ padding: "16px", textAlign: "center" }}>
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              backgroundColor: "#fff",
+              borderRadius: "50%",
+              padding: 8,
+              margin: "0 auto 16px auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
             <Image
               src="/logo.png"
               alt="Logo"
               width={80}
               height={80}
-              style={{ borderRadius: "50%", objectFit: "cover" }}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
             />
           </div>
 
           {!collapsed && (
             <div className={styles.userProfile}>
-              <Avatar size={80} className={styles.avatar}>
-                {firstLetter}
-              </Avatar>
-              <div className={styles.userInfo}>
-                <Text className={styles.userName}>{driverName}</Text>
-                <Text type="secondary" className={styles.onlineStatus}>
-                  Driver
+              <div className={styles.userInfo} style={{ marginTop: 0 }}>
+                <Text
+                  className={styles.userName}
+                  style={{ color: "#fff" }}
+                >
+                  {userData?.name || "User"}
+                </Text>
+                <Text
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    marginTop: 2,
+                    color: "#fff",
+                  }}
+                >
+                  {userData?.role || "Role"}
                 </Text>
               </div>
             </div>
@@ -87,9 +166,16 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["dashboard"]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
           className={styles.menu}
+          onClick={({ key }) => {
+            setSelectedKey(key);
+            const item = menuItems.find(item => item.key === key);
+            if (item && item.onClick) {
+              item.onClick();
+            }
+          }}
         />
       </Sider>
 
@@ -102,7 +188,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children }) => {
               onClick={() => setCollapsed(!collapsed)}
               className={styles.collapseButton}
             />
-            <Text className={styles.breadcrumbText}>Driver Panel</Text>
+            <Text className={styles.breadcrumbText}>Municipal Management</Text>
           </div>
 
           <div className={styles.headerRight}>

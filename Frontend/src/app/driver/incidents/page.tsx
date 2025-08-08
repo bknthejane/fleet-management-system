@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Table, Typography, Tag, message, Modal, Space, Button, Card } from "antd";
+import { Table, Typography, message, Modal, Space, Button, Card, Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useStyles } from "./style/driverIncidentStyle";
 import { IIncident } from "@/providers/incident-provider/context";
@@ -9,20 +9,13 @@ import { useIncidentActions, useIncidentState } from "@/providers/incident-provi
 import IncidentModal from "@/components/IncidentModal";
 
 const { Title } = Typography;
-
-interface Incident {
-  id: string;
-  description: string;
-  status: "Pending" | "Resolved";
-  dateReported: string;
-}
+const { Search } = Input;
 
 const DriverIncidentsPage: React.FC = () => {
   const { styles } = useStyles();
 
-
   const { incidents } = useIncidentState();
-  const { getIncidentList, createIncident, updateIncident, deleteIncident } = useIncidentActions();
+  const { getIncidentList, createIncident, updateIncident } = useIncidentActions();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editRecord, setEditRecord] = useState<IIncident | null>(null);
@@ -32,7 +25,8 @@ const DriverIncidentsPage: React.FC = () => {
   const [driverId, setDriverId] = useState<string>("");
 
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
@@ -44,7 +38,7 @@ const DriverIncidentsPage: React.FC = () => {
     const storedVehicleId = sessionStorage.getItem("vehicleId") || "";
     setVehicleId(storedVehicleId);
 
-    if (storedMunicipalityId && storedDriverId && storedDriverId) {
+    if (storedMunicipalityId && storedDriverId && storedVehicleId) {
       getIncidentList();
     }
   }, []);
@@ -63,19 +57,19 @@ const DriverIncidentsPage: React.FC = () => {
     setSaving(true);
     try {
       const userId = sessionStorage.getItem("userId") || "";
-      const municipalityId = sessionStorage.getItem("municipalityId") || "";
+      const municipalityIdFromStorage = sessionStorage.getItem("municipalityId") || "";
       const municipalityName = sessionStorage.getItem("municipalityName") || "";
-      const vehicleId = sessionStorage.getItem("vehicleId") || "";
-      const driverId = sessionStorage.getItem("driverId") || "";
+      const vehicleIdFromStorage = sessionStorage.getItem("vehicleId") || "";
+      const driverIdFromStorage = sessionStorage.getItem("driverId") || "";
 
       const incident: IIncident = {
         ...values,
         id: editRecord?.id,
         creatorUserId: editRecord?.creatorUserId ?? userId,
-        municipalityId: editRecord?.municipalityId ?? municipalityId,
+        municipalityId: editRecord?.municipalityId ?? municipalityIdFromStorage,
         municipalityName: editRecord?.municipalityName ?? municipalityName,
-        vehicleId: editRecord?.vehicleId ?? vehicleId,
-        driverId: editRecord?.driverId ?? driverId,
+        vehicleId: editRecord?.vehicleId ?? vehicleIdFromStorage,
+        driverId: editRecord?.driverId ?? driverIdFromStorage,
       };
 
       if (editRecord) {
@@ -96,32 +90,25 @@ const DriverIncidentsPage: React.FC = () => {
     }
   };
 
-  const handleDeleteIncident = (id?: string) => {
-    if (!id) return;
+  const filteredIncidents = (incidents || []).filter((inc) => {
+    if (
+      inc.municipalityId?.toString() !== municipalityId ||
+      inc.driverId?.toString() !== driverId ||
+      inc.vehicleId?.toString() !== vehicleId
+    )
+      return false;
 
-    Modal.confirm({
-      title: "Are you sure you want to delete this incident?",
-      okText: "Delete",
-      okType: "danger",
-      onOk: async () => {
-        setDeleting(true);
-        try {
-          await deleteIncident(id);
-          message.success("Incident deleted successfully");
-          await getIncidentList();
-        } catch (error) {
-          console.error("Delete error:", error);
-          message.error("Failed to delete incident");
-        } finally {
-          setDeleting(false);
-        }
-      },
-    });
-  };
+    if (!searchText) return true;
 
-  const filteredIncidents = incidents?.filter(
-    (inc) => inc.municipalityId?.toString() === municipalityId && inc.driverId?.toString() === driverId && inc.vehicleId?.toString() === vehicleId
-  ) || [];
+    const lowerSearch = searchText.toLowerCase();
+
+    return (
+      (inc.description?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (inc.incidentType?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (inc.department?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (inc.status?.toLowerCase().includes(lowerSearch) ?? false)
+    );
+  });
 
   const columns: ColumnsType<IIncident> = [
     { title: "Description", key: "description", render: (_, record) => record.description || "-" },
@@ -134,33 +121,39 @@ const DriverIncidentsPage: React.FC = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button type="link" onClick={() => openModal(record)} disabled={saving || deleting}>
+          <Button type="link" onClick={() => openModal(record)} disabled={saving}>
             Edit
-          </Button>
-          <Button
-            danger
-            type="link"
-            onClick={() => handleDeleteIncident(record.id)}
-            loading={deleting}
-            disabled={saving}
-          >
-            Delete
           </Button>
         </Space>
       ),
     },
-  ]
+  ];
 
   return (
-    <>
+    <div style={{ backgroundColor: "#f5f7fa", minHeight: "100vh", padding: "24px" }}>
       <div className={styles.pageHeader}>
         <Title level={3} className={styles.pageTitle}>
           Incidents
         </Title>
 
-        <Button type="primary" onClick={() => openModal()} disabled={saving || deleting}>
-          Create Incident
-        </Button>
+        <div className={styles.headerControls}>
+          <Search
+            placeholder="Search incidents"
+            allowClear
+            onChange={(e) => setSearchText(e.target.value)}
+            onSearch={(value) => setSearchText(value)}
+            className={styles.searchInput}
+            disabled={saving}
+          />
+          <Button
+            type="primary"
+            className={styles.addButton}
+            onClick={() => openModal()}
+            disabled={saving}
+          >
+            Create Incident
+          </Button>
+        </div>
       </div>
 
       <Card className={styles.tableCard}>
@@ -171,6 +164,7 @@ const DriverIncidentsPage: React.FC = () => {
           pagination={{ pageSize: 5 }}
           bordered
           loading={!incidents}
+          scroll={{ x: "max-content" }}
         />
       </Card>
 
@@ -181,7 +175,7 @@ const DriverIncidentsPage: React.FC = () => {
         onSave={handleSaveIncident}
         saving={saving}
       />
-    </>
+    </div>
   );
 };
 
