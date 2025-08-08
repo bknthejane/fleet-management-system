@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Table, Typography, Button, Space, message, Card } from "antd";
+import { Table, Typography, Button, Space, message, Card, Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useStyles } from "./style/mechanicJobCardStyle";
 import { IJobCard } from "@/providers/jobCard-provider/context";
@@ -9,6 +9,7 @@ import { useJobCardState, useJobCardActions } from "@/providers/jobCard-provider
 import MechanicJobCardModal from "@/components/MechanicJobCardModal";
 
 const { Title } = Typography;
+const { Search } = Input;
 
 const MechanicJobCards: React.FC = () => {
   const { styles } = useStyles();
@@ -24,6 +25,7 @@ const MechanicJobCards: React.FC = () => {
   const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const [mechanicId, setMechanicId] = useState<string>("");
 
@@ -39,7 +41,7 @@ const MechanicJobCards: React.FC = () => {
   const openJobCardModal = (record?: IJobCard) => {
     setEditRecord(record || null);
     setJobCardModalVisible(true);
-  }
+  };
 
   const openViewModal = (jobCard: IJobCard) => {
     setSelectedJobCard(jobCard);
@@ -53,7 +55,6 @@ const MechanicJobCards: React.FC = () => {
     setEditRecord(null);
     setSelectedJobCard(null);
   };
-
 
   const handleSaveJobCard = async (values: IJobCard) => {
     setSaving(true);
@@ -93,11 +94,22 @@ const MechanicJobCards: React.FC = () => {
     }
   };
 
-  const filteredJobCards = jobCards?.filter((jc) => jc.assignedMechanicId?.toString() === mechanicId) || [];
+  const filteredJobCards = (jobCards || []).filter((jc) => {
+    if (jc.assignedMechanicId?.toString() !== mechanicId) return false;
 
+    if (!searchText) return true;
+    const lowerSearch = searchText.toLowerCase();
+    return (
+      (jc.jobCardNumber?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (jc.notes?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (jc.priority?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (jc.status?.toLowerCase().includes(lowerSearch) ?? false) ||
+      (jc.assignedMechanicName?.toLowerCase().includes(lowerSearch) ?? false)
+    );
+  });
 
   const columns: ColumnsType<IJobCard> = [
-    { title: "JobCard Number", key: "jobCardnNumber", render: (_, r) => r.jobCardNumber || "-" },
+    { title: "JobCard Number", key: "jobCardNumber", render: (_, r) => r.jobCardNumber || "-" },
     { title: "Notes", key: "notes", render: (_, r) => r.notes || "-" },
     { title: "Priority", key: "priority", render: (_, r) => r.priority || "-" },
     { title: "Status", key: "status", render: (_, r) => r.status || "-" },
@@ -107,18 +119,31 @@ const MechanicJobCards: React.FC = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button type="link" onClick={() => openViewModal(record)}>View</Button>
+          <Button type="link" onClick={() => openViewModal(record)} disabled={saving}>
+            View
+          </Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#f5f7fa", minHeight: "100vh", padding: "24px" }}>
       <div className={styles.pageHeader}>
         <Title level={3} className={styles.pageTitle}>
           Job Cards
         </Title>
+
+        <div className={styles.headerControls}>
+          <Search
+            placeholder="Search job cards"
+            allowClear
+            onChange={(e) => setSearchText(e.target.value)}
+            onSearch={(value) => setSearchText(value)}
+            className={styles.searchInput}
+            disabled={saving}
+          />
+        </div>
       </div>
 
       <Card className={styles.tableCard}>
@@ -127,7 +152,9 @@ const MechanicJobCards: React.FC = () => {
           dataSource={filteredJobCards}
           rowKey="id"
           pagination={{ pageSize: 5 }}
+          bordered
           loading={!jobCards}
+          scroll={{ x: "max-content" }}
         />
       </Card>
 

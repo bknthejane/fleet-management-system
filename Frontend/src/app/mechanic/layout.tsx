@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Layout, Menu, Avatar, Button, Typography } from "antd";
+import { Layout, Menu, Button, Typography } from "antd";
 import {
   DashboardOutlined,
   ToolOutlined,
@@ -10,7 +10,7 @@ import {
   MenuUnfoldOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useStyles } from "./style/mechanicStyle";
 
 const { Header, Sider, Content } = Layout;
@@ -23,10 +23,37 @@ interface MechanicLayoutProps {
 const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
   const { styles } = useStyles();
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [userData, setUserData] = useState<{
+    name: string;
+    role: string;
+  } | null>(null);
+
+  const pathname = usePathname();
   const router = useRouter();
 
-  const mechanicName = "John Doe";
-  const firstLetter = mechanicName.charAt(0).toUpperCase();
+  const [selectedKey, setSelectedKey] = useState("dashboard");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      const storedUsername = sessionStorage.getItem("loggedInUser");
+      const storedRole = sessionStorage.getItem("role");
+
+      if (storedUsername && storedRole) {
+        setUserData({
+          name: storedUsername,
+          role: storedRole,
+        });
+      }
+    }
+
+    if (pathname) {
+      const keyFromPath = pathname.split("/").pop();
+      if (keyFromPath) {
+        setSelectedKey(keyFromPath);
+      }
+    }
+  }, [pathname]);
 
   const menuItems = [
     {
@@ -50,33 +77,87 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
 
   return (
     <Layout className={styles.layout}>
+      {isMobile && !collapsed && (
+        <div
+          onClick={() => setCollapsed(true)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            zIndex: 1000,
+          }}
+        />
+      )}
+
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
+        collapsedWidth={0}
         className={styles.sidebar}
-        width={260}
-        collapsedWidth={80}
+        width={280}
+        breakpoint="md"
+        onBreakpoint={(broken) => {
+          setCollapsed(broken);
+          setIsMobile(broken);
+        }}
+        onCollapse={(collapsed) => setCollapsed(collapsed)}
+        style={{
+          zIndex: 1100,
+          position: isMobile ? "fixed" : "relative",
+          height: "100vh",
+          transition: "all 0.3s ease-in-out",
+        }}
       >
-        <div className={styles.sidebarHeader}>
-          <div style={{ width: 60, height: 60, margin: "0 auto 16px auto" }}>
+        <div className={styles.sidebarHeader} style={{ padding: "16px", textAlign: "center" }}>
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              backgroundColor: "#fff",
+              borderRadius: "50%",
+              padding: 8,
+              margin: "0 auto 16px auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
             <Image
               src="/logo.png"
               alt="Logo"
-              width={60}
-              height={60}
-              style={{ borderRadius: "50%" }}
+              width={80}
+              height={80}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
             />
           </div>
 
           {!collapsed && (
             <div className={styles.userProfile}>
-              <Avatar size={64} className={styles.avatar}>
-                {firstLetter}
-              </Avatar>
-              <div className={styles.userInfo}>
-                <Text className={styles.userName}>{mechanicName}</Text>
-                <Text className={styles.onlineStatus}>Mechanic</Text>
+              <div className={styles.userInfo} style={{ marginTop: 0 }}>
+                <Text
+                  className={styles.userName}
+                  style={{ color: "#fff" }}
+                >
+                  {userData?.name || "User"}
+                </Text>
+                <Text
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    marginTop: 2,
+                    color: "#fff",
+                  }}
+                >
+                  {userData?.role || "Role"}
+                </Text>
               </div>
             </div>
           )}
@@ -85,9 +166,16 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["dashboard"]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
           className={styles.menu}
+          onClick={({ key }) => {
+            setSelectedKey(key);
+            const item = menuItems.find(item => item.key === key);
+            if (item && item.onClick) {
+              item.onClick();
+            }
+          }}
         />
       </Sider>
 
@@ -100,7 +188,7 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
               onClick={() => setCollapsed(!collapsed)}
               className={styles.collapseButton}
             />
-            <Text className={styles.breadcrumbText}>Mechanic Panel</Text>
+            <Text className={styles.breadcrumbText}>Municipal Management</Text>
           </div>
 
           <div className={styles.headerRight}>
