@@ -19,6 +19,7 @@ import { useVehicleState, useVehicleActions } from "@/providers/vehicle-provider
 import { useDriverState, useDriverActions } from "@/providers/driver-provider";
 import { ColumnsType } from "antd/es/table";
 import VehicleModal from "@/components/VehicleModal";
+import useApp from "antd/es/app/useApp";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -46,6 +47,8 @@ const VehiclesPage: React.FC = () => {
     const [deleting, setDeleting] = useState(false);
 
     const [municipalityId, setMunicipalityId] = useState<string>("");
+    const app = useApp();
+    
 
     useEffect(() => {
         const storedMunicipalityId = sessionStorage.getItem("municipalityId") || "";
@@ -94,17 +97,17 @@ const VehiclesPage: React.FC = () => {
 
             if (editRecord) {
                 await updateVehicle(vehicle);
-                message.success(`Updated Vehicle: ${vehicle.fleetNumber}`);
+                app.message.success(`Updated Vehicle: ${vehicle.fleetNumber}`);
             } else {
                 await createVehicle(vehicle);
-                message.success(`Added Vehicle: ${vehicle.fleetNumber}`);
+                app.message.success(`Added Vehicle: ${vehicle.fleetNumber}`);
             }
 
             await getVehicleList();
             closeAllModals();
         } catch (error) {
             console.error("Error saving vehicle:", error);
-            message.error("Failed to save vehicle");
+            app.message.error("Failed to save vehicle");
         } finally {
             setSaving(false);
         }
@@ -126,7 +129,7 @@ const VehiclesPage: React.FC = () => {
                         message.success("Vehicle deleted successfully");
                     } catch (error) {
                         console.error("Delete error:", error);
-                        message.error("Failed to delete vehicle");
+                        app.message.error("Failed to delete vehicle");
                     } finally {
                         setDeleting(false);
                     }
@@ -153,14 +156,14 @@ const VehiclesPage: React.FC = () => {
                 });
             }
 
-            message.success("Driver assigned successfully!");
+            app.message.success("Driver assigned successfully!");
             await Promise.all([getVehicleList(), getDriverList()]);
             setAssignModalVisible(false);
             setSelectedDriverId(null);
             setViewModalVisible(false);
         } catch (error) {
             console.error("Error assigning driver:", error);
-            message.error("Failed to assign driver");
+            app.message.error("Failed to assign driver");
         } finally {
             setAssigning(false);
         }
@@ -184,12 +187,12 @@ const VehiclesPage: React.FC = () => {
                 });
             }
 
-            message.success("Driver unassigned successfully!");
+            app.message.success("Driver unassigned successfully!");
             await Promise.all([getVehicleList(), getDriverList()]);
             setViewModalVisible(false);
         } catch (error) {
             console.error("Error unassigning driver:", error);
-            message.error("Failed to unassign driver");
+            app.message.error("Failed to unassign driver");
         } finally {
             setUnassigning(false);
         }

@@ -7,6 +7,7 @@ import { useStyles } from "./style/mechanicJobCardStyle";
 import { IJobCard } from "@/providers/jobCard-provider/context";
 import { useJobCardState, useJobCardActions } from "@/providers/jobCard-provider";
 import MechanicJobCardModal from "@/components/MechanicJobCardModal";
+import useApp from "antd/es/app/useApp";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -28,6 +29,8 @@ const MechanicJobCards: React.FC = () => {
   const [searchText, setSearchText] = useState("");
 
   const [mechanicId, setMechanicId] = useState<string>("");
+  const app = useApp();
+  
 
   useEffect(() => {
     const storedMechanicId = sessionStorage.getItem("mechanicId") || "";
@@ -78,17 +81,17 @@ const MechanicJobCards: React.FC = () => {
 
       if (editRecord) {
         await updateJobCard(jobCard);
-        message.success(`Updated JobCard: ${jobCard.jobCardNumber}`);
+        app.message.success(`Updated JobCard: ${jobCard.jobCardNumber}`);
       } else {
         await createJobCard(jobCard);
-        message.success(`Added JobCard: ${jobCard.jobCardNumber}`);
+        app.message.success(`Added JobCard: ${jobCard.jobCardNumber}`);
       }
 
       await getJobCardList();
       closeAllModals();
     } catch (error) {
       console.error("Error saving JobCard:", error);
-      message.error("Failed to save JobCard");
+      app.message.error("Failed to save JobCard");
     } finally {
       setSaving(false);
     }

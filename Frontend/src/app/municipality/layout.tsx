@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useStyles } from "./style/municipalityAdminStyles";
 import { useRouter, usePathname } from "next/navigation";
+import withAuth from "@/hoc/withAuth";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -229,4 +230,4 @@ const MunicipalityLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   );
 };
 
-export default MunicipalityLayout;
+export default withAuth(MunicipalityLayout, {allowedRoles:["MunicipalityAdmin"]});
