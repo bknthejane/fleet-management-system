@@ -13,6 +13,7 @@ export interface IMechanic {
     email?: string;
     password?: string;
     creatorUserId?: string;
+    userId?: string;
     LastModifierUserId?: string;
     department?: string;
 }
