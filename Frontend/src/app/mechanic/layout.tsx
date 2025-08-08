@@ -129,7 +129,7 @@ const MechanicLayout: React.FC<MechanicLayoutProps> = ({ children }) => {
             }}
           >
             <Image
-              src="/logo.png"
+              src="/Logo.png"
               alt="Logo"
               width={80}
               height={80}

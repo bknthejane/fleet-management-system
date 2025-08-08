@@ -36,7 +36,7 @@ const MechanicDashboard: React.FC = () => {
     }
 
     fetchData();
-  }, [getJobCardList]);
+  }, []);
 
   const filteredJobCards = jobCards?.filter((jc) => jc.assignedMechanicId === mechanicId) || [];
 
