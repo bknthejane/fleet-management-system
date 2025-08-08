@@ -136,7 +136,7 @@ const SupervisorLayout: React.FC<SupervisorLayoutProps> = ({ children }) => {
               }}
             >
               <Image
-                src="/logo.png"
+                src="/Logo.png"
                 alt="Logo"
                 width={80}
                 height={80}
